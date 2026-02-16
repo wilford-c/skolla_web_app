@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Attendance · Skola{% endblock %}
+{% block page_title %}Attendance Records{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Daily Operations</p>
+            <h2 class="panel-title">Attendance Log</h2>
+        </div>
+        <div class="panel-actions">
+            {% if can_record_attendance %}
+                <a class="btn btn-primary" href="{% url 'attendance:create' %}">Record Attendance</a>
+            {% endif %}
+        </div>
+    </div>
+    <form method="get" class="filter-bar">
+        <label>Status</label>
+        <select name="status" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            {% for key, label in statuses %}
+                <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Recorded By</th>
+                    {% if can_manage_attendance %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.student.full_name }}</td>
+                        <td>{{ record.classroom }}</td>
+                        <td>{{ record.subject|default:"-" }}</td>
+                        <td>
+                            {% if record.status == record.Status.PRESENT %}
+                                <span class="status-pill status-present">{{ record.get_status_display }}</span>
+                            {% elif record.status == record.Status.ABSENT %}
+                                <span class="status-pill status-absent">{{ record.get_status_display }}</span>
+                            {% elif record.status == record.Status.LATE %}
+                                <span class="status-pill status-late">{{ record.get_status_display }}</span>
+                            {% else %}
+                                <span class="status-pill status-excused">{{ record.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.recorded_by }}</td>
+                        {% if can_manage_attendance %}
+                            <td>
+                                <div class="table-actions">
+                                    <a class="btn btn-neutral btn-small" href="{% url 'attendance:update' record.pk %}">Edit</a>
+                                    <form method="post" action="{% url 'attendance:delete' record.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{% if can_manage_attendance %}7{% else %}6{% endif %}">No records yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

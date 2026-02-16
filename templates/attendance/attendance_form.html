@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}{{ window_title|default:'Record Attendance · Skola' }}{% endblock %}
+{% block page_title %}{{ page_title|default:'Record Attendance' }}{% endblock %}
+{% block content %}
+<section class="form-layout">
+    <p class="page-label">{{ page_label|default:'Daily Operations' }}</p>
+    <div class="form-card">
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="form-grid">
+                {% for field in form %}
+                    <div class="field-block">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p class="field-help">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="field-errors">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">{{ submit_label|default:'Submit Attendance' }}</button>
+                <a class="btn btn-ghost" href="{% url 'attendance:list' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard · Skola{% endblock %}
+{% block page_title %}
+    {% if is_teacher_portal %}
+        Classroom Briefing
+    {% elif is_student_portal %}
+        Your Learning Snapshot
+    {% elif is_guardian_portal %}
+        Family Attendance Portal
+    {% else %}
+        Welcome back, {{ request.user.first_name|default:'Team Skola' }}
+    {% endif %}
+{% endblock %}
+{% block header_actions %}
+    {% if can_record_attendance %}
+        <a class="btn btn-primary" href="{% url 'attendance:list' %}">Record Attendance</a>
+    {% endif %}
+{% endblock %}
+{% block content %}
+{% if is_admin_portal %}
+    <section class="panel hero-panel" style="margin-bottom:1.75rem;">
+        <div class="grid-auto" style="gap:0.5rem;">
+            <p class="page-label">This week</p>
+            <div class="hero-header">
+                <div>
+                    <h2 style="margin:0;font-size:2rem;">School Pulse Overview</h2>
+                    <p style="margin:0.25rem 0 0;color:var(--text-muted);">Attendance trends and enrollment metrics update live every few minutes.</p>
+                </div>
+                <div class="hero-metrics">
+                    <span class="status-pill status-present">+4.2% attendance</span>
+                    <span class="status-pill status-late">3 classrooms pending</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stat-grid">
+        <article class="stat-card">
+            <p class="stat-label">Active Students</p>
+            <p class="stat-value">{{ student_count }}</p>
+            <p class="stat-trend">↑ Healthy enrollment</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Classrooms</p>
+            <p class="stat-value">{{ class_count }}</p>
+            <p class="stat-trend">Balanced distribution</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Subjects</p>
+            <p class="stat-value">{{ subject_count }}</p>
+            <p class="stat-trend">Curriculum stable</p>
+        </article>
+    </section>
+
+    <section class="responsive-stack" style="margin-top:2rem;">
+        <article class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Recent Attendance</h3>
+                <a href="{% url 'attendance:list' %}" class="btn btn-ghost" style="background:rgba(37,99,235,0.08);color:var(--primary);">View all</a>
+            </div>
+            {% include 'partials/attendance_table.html' with records=recent_attendance show_subject=True %}
+        </article>
+        <article class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Operational Feed</h3>
+            </div>
+            <ul class="timeline">
+                {% for record in recent_attendance|slice:':5' %}
+                    <li class="timeline-item">
+                        <span class="timeline-dot"></span>
+                        <div>
+                            <strong>{{ record.classroom }}</strong>
+                            <p class="timeline-meta">{{ record.student.full_name }} • {{ record.get_status_display }} on {{ record.date }}</p>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="timeline-item">
+                        <span class="timeline-dot"></span>
+                        <div>
+                            <strong>Stay tuned</strong>
+                            <p class="timeline-meta">Activity feed updates as soon as attendance is captured.</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </article>
+    </section>
+{% elif is_teacher_portal %}
+    <section class="panel hero-panel" style="margin-bottom:1.75rem;">
+        <p class="page-label">Teaching overview</p>
+        <h2 style="margin:0;font-size:2rem;">Hi {{ request.user.first_name|default:request.user.display_name }}, here is your workload.</h2>
+        <p style="margin:0.25rem 0 0;color:var(--text-muted);">Class assignments, subjects, and the latest attendance you captured.</p>
+    </section>
+
+    <section class="stat-grid">
+        <article class="stat-card">
+            <p class="stat-label">Homeroom / Classes</p>
+            <p class="stat-value">{{ teacher_classes|length }}</p>
+            <p class="stat-trend">Active classrooms assigned</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Subjects</p>
+            <p class="stat-value">{{ teacher_subjects|length }}</p>
+            <p class="stat-trend">Across {{ teacher_classes|length }} classrooms</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Attendance Logged (7d)</p>
+            <p class="stat-value">{{ recent_attendance|length }}</p>
+            <p class="stat-trend">Latest submissions below</p>
+        </article>
+    </section>
+
+    <section class="responsive-stack" style="margin-top:2rem;">
+        <article class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Assigned Classrooms</h3>
+            </div>
+            <ul class="list-grid">
+                {% for classroom in teacher_classes %}
+                    <li class="list-tile">
+                        <strong>{{ classroom.name }}</strong>
+                        <p class="timeline-meta">Code {{ classroom.code }}</p>
+                    </li>
+                {% empty %}
+                    <li class="list-tile">You are not assigned to any classrooms yet.</li>
+                {% endfor %}
+            </ul>
+        </article>
+        <article class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Subjects You Teach</h3>
+            </div>
+            <ul class="list-grid">
+                {% for subject in teacher_subjects %}
+                    <li class="list-tile">
+                        <strong>{{ subject.name }}</strong>
+                        <p class="timeline-meta">{{ subject.classroom }} • {{ subject.weekly_sessions }} sessions/week</p>
+                    </li>
+                {% empty %}
+                    <li class="list-tile">Subjects will appear once assigned.</li>
+                {% endfor %}
+            </ul>
+        </article>
+    </section>
+
+    <section class="panel" style="margin-top:2rem;">
+        <div class="panel-header">
+            <h3 class="panel-title">Recent Attendance You Submitted</h3>
+            <a href="{% url 'attendance:list' %}" class="btn btn-ghost">Go to attendance</a>
+        </div>
+        {% include 'partials/attendance_table.html' with records=recent_attendance show_subject=True %}
+    </section>
+{% elif is_student_portal %}
+    {% if student_profile %}
+        <section class="panel hero-panel" style="margin-bottom:1.75rem;">
+            <p class="page-label">Your progress</p>
+            <h2 style="margin:0;font-size:2rem;">Welcome, {{ student_profile.full_name }}</h2>
+            <p style="margin:0.25rem 0 0;color:var(--text-muted);">Attendance summary and latest classroom updates.</p>
+        </section>
+        <section class="stat-grid">
+            <article class="stat-card">
+                <p class="stat-label">Present Days</p>
+                <p class="stat-value">{{ student_attendance_summary.PRESENT|default:0 }}</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Absences</p>
+                <p class="stat-value">{{ student_attendance_summary.ABSENT|default:0 }}</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Late / Excused</p>
+                <p class="stat-value">{{ student_attendance_summary.LATE|default:0 }} / {{ student_attendance_summary.EXCUSED|default:0 }}</p>
+            </article>
+        </section>
+        <section class="panel" style="margin-top:2rem;">
+            <div class="panel-header">
+                <h3 class="panel-title">Recent Attendance</h3>
+            </div>
+            {% include 'partials/attendance_table.html' with records=student_recent_attendance show_subject=True %}
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">No student record linked</h3>
+            </div>
+            <p>Please contact the school office so your portal account can be linked to a student profile.</p>
+        </section>
+    {% endif %}
+{% elif is_guardian_portal %}
+    <section class="panel hero-panel" style="margin-bottom:1.75rem;">
+        <p class="page-label">Family overview</p>
+        <h2 style="margin:0;font-size:2rem;">Welcome, {{ request.user.display_name }}</h2>
+        <p style="margin:0.25rem 0 0;color:var(--text-muted);">Track each student's attendance without calling the office.</p>
+    </section>
+    {% if guardian_children %}
+        <section class="responsive-stack">
+            {% for child in guardian_children %}
+                <article class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">{{ child.student.full_name }}</h3>
+                            <p class="timeline-meta">Admission #{{ child.student.admission_number }}</p>
+                        </div>
+                    </div>
+                    <div class="stat-grid" style="margin-bottom:1rem;">
+                        <article class="stat-card">
+                            <p class="stat-label">Present</p>
+                            <p class="stat-value">{{ child.attendance_summary.PRESENT|default:0 }}</p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-label">Absent</p>
+                            <p class="stat-value">{{ child.attendance_summary.ABSENT|default:0 }}</p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-label">Late / Excused</p>
+                            <p class="stat-value">{{ child.attendance_summary.LATE|default:0 }} / {{ child.attendance_summary.EXCUSED|default:0 }}</p>
+                        </article>
+                    </div>
+                    {% include 'partials/attendance_table.html' with records=child.recent_records show_subject=True %}
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="panel">
+            <p>No students are linked to your account yet. Ask the school to connect your profile to your children.</p>
+        </section>
+    {% endif %}
+{% else %}
+    <section class="panel">
+        <p>The dashboard for your role is coming soon.</p>
+    </section>
+{% endif %}
+{% endblock %}

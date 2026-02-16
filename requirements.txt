@@ -1,0 +1,2 @@
+# Convenience shim for existing tooling
+-r requirements/local.txt

@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Django Dev Server",
+			"type": "shell",
+			"command": "C:/Users/USER/OneDrive/Desktop/Skola/.venv/Scripts/python.exe",
+			"args": [
+				"manage.py",
+				"runserver"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

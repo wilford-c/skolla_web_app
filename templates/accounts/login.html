@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Login · Skola{% endblock %}
+{% block page_title %}Sign in to Skola{% endblock %}
+{% block content %}
+<section class="auth-form">
+    <div class="auth-intro">
+        <h2>Welcome back</h2>
+        <p>Access your dashboard to manage students, classrooms, and attendance in one place.</p>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="form-card">
+            {% for field in form %}
+                <div class="field-block">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-errors">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Sign in</button>
+            <p style="margin:0;">No account yet? <a href="{% url 'accounts:register' %}">Create one</a>.</p>
+        </div>
+    </form>
+</section>
+{% endblock %}

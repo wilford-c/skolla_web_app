@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Subjects · Skola{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Curriculum</p>
+            <h2 class="panel-title">Subject Catalog</h2>
+        </div>
+        {% if can_create_subjects %}
+            <a class="btn btn-primary" href="{% url 'academics:subject_create' %}">New Subject</a>
+        {% endif %}
+    </div>
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Teacher</th>
+                    <th>Sessions/week</th>
+                    {% if can_manage_subjects %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                    <tr>
+                        <td>{{ subject.code }}</td>
+                        <td>{{ subject.name }}</td>
+                        <td>{{ subject.classroom }}</td>
+                        <td>{{ subject.teacher }}</td>
+                        <td>{{ subject.weekly_sessions }}</td>
+                        {% if can_manage_subjects %}
+                            <td>
+                                <div class="table-actions">
+                                    <a class="btn btn-neutral btn-small" href="{% url 'academics:subject_update' subject.pk %}">Edit</a>
+                                    <form method="post" action="{% url 'academics:subject_delete' subject.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{% if can_manage_subjects %}6{% else %}5{% endif %}">No subjects yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

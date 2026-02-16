@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Classes · Skola{% endblock %}
+{% block page_title %}Classrooms{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Academics</p>
+            <h2 class="panel-title">Classroom Overview</h2>
+        </div>
+        {% if can_create_classrooms %}
+            <a class="btn btn-primary" href="{% url 'academics:classroom_create' %}">New Class</a>
+        {% endif %}
+    </div>
+    <div class="card-grid">
+        {% for classroom in classrooms %}
+            <article class="card">
+                <h3>{{ classroom.name }}</h3>
+                <p><strong>Code:</strong> {{ classroom.code }}</p>
+                <p><strong>Homeroom:</strong> {{ classroom.homeroom_teacher|default:'—' }}</p>
+                <p>{{ classroom.description|default:"No description provided" }}</p>
+                {% if can_manage_classrooms %}
+                    <div class="table-actions card-actions">
+                        <a class="btn btn-neutral btn-small" href="{% url 'academics:classroom_update' classroom.pk %}">Edit</a>
+                        <form method="post" action="{% url 'academics:classroom_delete' classroom.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </article>
+        {% empty %}
+            <p>No classes yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

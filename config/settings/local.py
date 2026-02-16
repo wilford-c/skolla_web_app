@@ -1,0 +1,6 @@
+"""Local development settings."""
+from .base import *  # noqa
+
+DEBUG = True
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
