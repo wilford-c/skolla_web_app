@@ -1,86 +1,66 @@
 # Skola
 
-Skola is a lightweight school management system built with Django and a minimal HTML/CSS/JS front-end. It focuses on clear workflows for staff members to manage students, classrooms, subjects, and attendance while providing role-aware access control.
+School management platform for managing students, classes, subjects, attendance, and role-based access. Built on Django 6 with the Cookiecutter-Django project layout, but running the original Skola domain models and views.
 
-The codebase now follows the [cookiecutter-django](https://github.com/cookiecutter/cookiecutter-django) conventions:
-- Modular settings split across `config/settings/base.py`, `local.py`, and `production.py`.
-- Environment-driven configuration loaded from `.env` (see `.env.example`).
-- Structured requirements in `requirements/` for base, local, and production installs.
+## Tech Stack
+- Django 6.0 with a custom `accounts.User` model (role aware)
+- SQLite for local development (override via `DATABASE_URL`)
+- Basic HTML/CSS/JS templates (no frontend build pipeline)
+- Cookiecutter tooling structure (`pyproject.toml`, `uv.lock`, `.envs/` scaffolding)
 
-## Features
-- **Authentication & Roles** – Custom `User` model with administrator, staff, teacher, and student roles plus login, registration, and session management.
-- **Student Management** – Capture enrollment data, guardians, and contact details; list and create records quickly.
-- **Class & Subject Management** – Organize classrooms, assign homeroom teachers, and manage subjects per class.
-- **Attendance Tracking** – Record attendance per class/subject with status filters and quick history on the dashboard.
-- **Dashboard** – At-a-glance metrics with latest attendance entries.
+## Quick Start
+1. **Python environment**
+    ```powershell
+    py -3.13 -m venv .venv
+    .\.venv\Scripts\Activate.ps1
+    python -m pip install --upgrade pip uv
+    ```
+2. **Install dependencies**
+    ```powershell
+    uv pip sync pyproject.toml
+    ```
+3. **Configure environment**
+    - Copy `.env.example` to `.env` (already present) and adjust secrets/DB URLs as needed.
+4. **Run database migrations**
+    ```powershell
+    python manage.py migrate
+    ```
+5. **(Optional) Seed demo users**
+    ```powershell
+    python manage.py seed_test_users
+    ```
+6. **Start the dev server**
+    - VS Code: run the `Run Django Dev Server` task (preferred)
+    - CLI fallback: `python manage.py runserver`
 
-## Project Structure
-```
-manage.py
-config/
-  settings/
-    base.py    # shared settings loaded via django-environ
-    local.py   # local-only overrides (default when using manage.py)
-    production.py
-  urls.py      # root URLConf
-accounts/      # Custom user model, auth flows, decorators
-students/      # Student CRUD views & forms
-academics/     # Classrooms & subjects
-attendance/    # Attendance records & filters
-static/        # Base CSS
-templates/     # HTML templates grouped by app
-requirements/  # base/local/production requirement sets
-```
+## Default Accounts
+After running `seed_test_users`, the following logins are available (passwords printed in the command output):
+- Admin / staff / teacher / student / guardian personas
 
-## Getting Started
-1. **Install dependencies**
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate  # Windows
-   pip install -r requirements/local.txt
-   ```
-2. **Create your environment file**
-   ```bash
-   copy .env.example .env  # PowerShell: Copy-Item .env.example .env
-   ```
-   Update values as needed (secret key, database URL, allowed hosts, timezone).
-3. **Apply migrations**
-   ```bash
-   python manage.py migrate
-   ```
-4. **Create a superuser (optional but recommended)**
-   ```bash
-   python manage.py createsuperuser
-   ```
-5. **Run the dev server**
-   ```bash
-   python manage.py runserver
-   ```
-6. Visit http://127.0.0.1:8000/ and start managing your school data.
-
-### Seed demo accounts
-Quickly create one user for every role (admin, staff, teacher, student) so you can preview the role-based dashboards:
-
-```bash
-python manage.py seed_test_users  # add --password=myPass to override the default
+You can also create your own superuser:
+```powershell
+python manage.py createsuperuser
 ```
 
-| Username | Role        | Password        |
-| -------- | ----------- | ----------------|
-| admin    | Administrator | `SkolaTest123!` |
-| staff    | Staff       | `SkolaTest123!` |
-| teacher  | Teacher     | `SkolaTest123!` |
-| student  | Student     | `SkolaTest123!` |
+## Project Structure Highlights
+- `accounts`, `students`, `academics`, `attendance`: feature apps migrated from the pre-Cookiecutter project
+- `config/settings/`: environment-specific settings (`local`, `production`, `test`). `base.py` mirrors the earlier configuration (SQLite default, Whitenoise, custom user model, Argon2 password hasher)
+- `templates/` and `static/`: original UI assets copied under `skola/templates` and `skola/static`
 
-Running the command again resets the same password and keeps profile details in sync, so it is safe to re-run whenever you need to refresh your test data.
+## Useful Commands
+- `python manage.py check` – configuration validation
+- `python manage.py test` – Django test suite
+- `python manage.py shell_plus` – (if you add `django-extensions`) advanced shell
 
-## Testing & Checks
-Run the Django system checks before committing:
-```bash
-python manage.py check
-```
+## Deployment Notes
+- Configure `DJANGO_ALLOWED_HOSTS`, `DJANGO_SECRET_KEY`, and `DJANGO_DEBUG` via environment variables.
+- Switch `DATABASE_URL` to your production PostgreSQL instance.
+- Static files are served via Whitenoise; run `python manage.py collectstatic` before deploying.
 
-## Future Enhancements
-- Bulk student import/export
-- Attendance analytics (per class/term)
-- Guardian portal with notifications
+## Troubleshooting
+- **Missing packages**: sync against `pyproject.toml` (`uv pip sync pyproject.toml`).
+- **Password hashing errors**: ensure `argon2-cffi` is installed (already pinned in `pyproject.toml`).
+- **Port already in use**: stop the running task (`Run Django Dev Server`) before launching another server.
+
+---
+MIT Licensed. Refer to `LICENSE` for details.

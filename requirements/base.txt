@@ -1,2 +1,0 @@
-Django==6.0.1
-django-environ==0.11.2

@@ -12,7 +12,7 @@
 
 - [x] Create and Run Task (Added VS Code task "Run Django Dev Server" and executed it once.)
 
-- [ ] Launch the Project
+- [x] Launch the Project (Run Django Dev Server task verified)
 
  - [x] Ensure Documentation is Complete
 
