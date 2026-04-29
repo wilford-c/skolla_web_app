@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Billing · Skola{% endblock %}
+{% block page_title %}Fee Invoices{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Finance</p>
+            <h2 class="panel-title">Invoice Management</h2>
+        </div>
+        {% if can_manage_billing %}
+            <a class="btn btn-primary" href="{% url 'billing:invoice_create' %}">Create Invoice</a>
+        {% endif %}
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:1.25rem;">
+        <article class="stat-card">
+            <p class="stat-label">Total Billed</p>
+            <p class="stat-value">${{ total_billed|floatformat:2 }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Collected</p>
+            <p class="stat-value">${{ total_collected|floatformat:2 }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Outstanding</p>
+            <p class="stat-value">${{ total_outstanding|floatformat:2 }}</p>
+        </article>
+    </div>
+
+    <form method="get" class="filter-bar" style="margin-bottom:1rem;flex-wrap:wrap;">
+        <div>
+            <label for="q">Search</label>
+            <input id="q" name="q" value="{{ query }}" placeholder="Student, admission #, description" style="border:1px solid var(--border);border-radius:12px;padding:0.5rem 0.75rem;" />
+        </div>
+        <div>
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                {% for value, label in status_options %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if can_manage_billing %}
+            <div>
+                <label for="student">Student</label>
+                <select id="student" name="student">
+                    <option value="">All students</option>
+                    {% for student in students %}
+                        <option value="{{ student.student_id }}" {% if selected_student == student.student_id|stringformat:'s' %}selected{% endif %}>
+                            {{ student.student__admission_number }} - {{ student.student__first_name }} {{ student.student__last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+        <div style="display:flex;gap:0.5rem;align-items:flex-end;">
+            <button class="btn btn-primary btn-small" type="submit">Apply</button>
+            <a class="btn btn-neutral btn-small" href="{% url 'billing:invoice_list' %}">Reset</a>
+        </div>
+    </form>
+
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Student</th>
+                    <th>Category</th>
+                    <th>Due Date</th>
+                    <th>Amount</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                    {% include 'billing/partials/invoice_row.html' %}
+                {% empty %}
+                    <tr>
+                        <td colspan="9">No invoices found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

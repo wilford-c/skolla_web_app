@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Skola{% endblock %}
+
+{% block page_title %}My Profile{% endblock %}
+
+{% block header_actions %}
+<div class="header-actions">
+    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ user.display_name|slice:":2"|upper }}
+            </div>
+            <div class="profile-info">
+                <h2 class="profile-name">{{ user.display_name }}</h2>
+                <p class="profile-role">{{ user.get_role_display }}</p>
+                <p class="profile-username">@{{ user.username }}</p>
+            </div>
+        </div>
+
+        <div class="profile-details">
+            <div class="detail-section">
+                <h3 class="section-title">Personal Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">First Name</span>
+                        <span class="detail-value">{{ user.first_name|default:"Not provided" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Name</span>
+                        <span class="detail-value">{{ user.last_name|default:"Not provided" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{ user.email|default:"Not provided" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Username</span>
+                        <span class="detail-value">{{ user.username }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Role</span>
+                        <span class="detail-value">{{ user.get_role_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date Joined</span>
+                        <span class="detail-value">{{ user.date_joined|date:"F d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h3 class="section-title">Security</h3>
+                <div class="security-actions">
+                    <a href="{% url 'accounts:password_change' %}" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 1a3.5 3.5 0 0 0-3.5 3.5V7A1.5 1.5 0 0 0 3 8.5v5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 11.5 7V4.5A3.5 3.5 0 0 0 8 1zm2 6V4.5a2 2 0 1 0-4 0V7h4z"/>
+                        </svg>
+                        Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.profile-card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    padding: 3rem 2rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: white;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    display: grid;
+    place-items: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.profile-role {
+    margin: 0 0 0.25rem;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.profile-username {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+.profile-details {
+    padding: 2rem;
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+    color: var(--text-primary);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.security-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.security-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+</style>
+{% endblock %}

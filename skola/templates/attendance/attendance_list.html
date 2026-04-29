@@ -8,7 +8,8 @@
             <p class="page-label">Daily Operations</p>
             <h2 class="panel-title">Attendance Log</h2>
         </div>
-        <div class="panel-actions">
+        <div class="panel-actions" style="display: flex; gap: 0.5rem;">
+            <a class="btn btn-neutral" href="{% url 'attendance:reports' %}">View Reports</a>
             {% if can_record_attendance %}
                 <a class="btn btn-primary" href="{% url 'attendance:create' %}">Record Attendance</a>
             {% endif %}

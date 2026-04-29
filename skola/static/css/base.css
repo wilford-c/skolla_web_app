@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
     --bg-body: #f4f6fb;
     --bg-panel: #ffffff;
@@ -25,7 +23,7 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Nunito Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg-body);
     color: var(--text-primary);
     min-height: 100vh;
@@ -77,10 +75,25 @@ a {
     color: rgba(248, 250, 252, 0.7);
 }
 
+.user-card-link {
+    text-decoration: none;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.user-card-link:hover {
+    transform: translateY(-2px);
+}
+
 .user-card {
     background: var(--bg-sidebar-accent);
     border-radius: 14px;
     padding: 1rem;
+    transition: background 0.2s;
+}
+
+.user-card-link:hover .user-card {
+    background: rgba(148, 163, 184, 0.15);
 }
 
 .user-name {

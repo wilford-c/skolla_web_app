@@ -1,0 +1,18 @@
+Dear {{ guardian_name }},
+
+Here is your attendance digest for {{ digest_label }}.
+
+{% for group in grouped_students %}
+Student: {{ group.student.full_name }} ({{ group.student.admission_number }})
+{% for row in group.rows %}
+- {{ row.date }} | {{ row.status }} | Classroom: {{ row.classroom }}{% if row.subject %} | Subject: {{ row.subject }}{% endif %}
+{% endfor %}
+
+{% endfor %}
+Total attendance events: {{ total_events }}
+
+Best regards,
+Skola School Management System
+
+---
+This is an automated message. Please do not reply to this email.

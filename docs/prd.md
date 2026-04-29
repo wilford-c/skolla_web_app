@@ -172,11 +172,17 @@ Stories grouped by epic and prioritized using MoSCoW.
 - **US-404:** Attendance Correction & Audit *(Must – 5 pts)*
 - **US-405:** Automated Attendance Alerts *(Should – 8 pts)*
 - **US-406:** Attendance Integration with Student Records *(Should – 3 pts)*
+- **US-407:** Custom Attendance Report Builder *(Should – 8 pts)*
+- **US-408:** Attendance Analytics Dashboard with Trends *(Should – 8 pts)*
+- **US-409:** PDF Report Generation with Charts *(Should – 5 pts)*
 
 ### EPIC 5: Family Engagement & Guardian Portal
 - **US-501:** Guardian Account Creation & Student Linking *(Must – 8 pts)*
 - **US-502:** Guardian Attendance Dashboard *(Must – 8 pts)*
 - **US-503:** Family Notifications & Messaging Hooks *(Should – 5 pts)*
+- **US-504:** Email Alert Configuration System *(Should – 8 pts)*
+- **US-505:** SMS Integration Setup *(Should – 13 pts)*
+- **US-506:** Guardian Notification Preferences *(Should – 5 pts)*
 
 Each story includes detailed acceptance criteria, dependencies, and notes as provided in the user specification.
 

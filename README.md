@@ -5,6 +5,7 @@ School management platform for managing students, classes, subjects, attendance,
 ## Tech Stack
 - Django 6.0 with a custom `accounts.User` model (role aware)
 - SQLite for local development (override via `DATABASE_URL`)
+- **HTMX** for real-time UI interactions without JavaScript
 - Basic HTML/CSS/JS templates (no frontend build pipeline)
 - Cookiecutter tooling structure (`pyproject.toml`, `uv.lock`, `.envs/` scaffolding)
 
@@ -47,10 +48,63 @@ python manage.py createsuperuser
 - `config/settings/`: environment-specific settings (`local`, `production`, `test`). `base.py` mirrors the earlier configuration (SQLite default, Whitenoise, custom user model, Argon2 password hasher)
 - `templates/` and `static/`: original UI assets copied under `skola/templates` and `skola/static`
 
+## Features
+
+### Student Management
+- CRUD operations for student profiles
+- **Bulk CSV Import/Export**: Administrators can import multiple students at once or export existing student data
+  - Import preview with validation and error reporting
+  - Sample CSV file: `students_import_sample.csv`
+  - Required CSV columns: `admission_number`, `first_name`, `last_name`, `date_of_birth` (YYYY-MM-DD), `guardian_name`
+    - Optional columns: `current_classroom_code`, `contact_email`, `contact_phone`, `status` (ACTIVE/INACTIVE/GRADUATED)
+
+### Authentication & Authorization
+- Role-based access control (Admin, Staff, Teacher, Student, Guardian)
+- Custom user model with role field
+
+### Real-time UI with HTMX
+- **Live Search**: Instant student search as you type (300ms debounce)
+- **Auto-updating Notifications**: Badge updates every 30 seconds without page refresh
+- **Inline Delete**: Delete students with confirmation and smooth row removal
+- **No JavaScript Required**: All interactions powered by HTML attributes
+- 📖 See [`docs/htmx_guide.md`](docs/htmx_guide.md) for implementation details and patterns
+- 📋 Quick reference: [`docs/htmx_quickref.md`](docs/htmx_quickref.md)
+
+### Academics
+- Class and subject management
+- Assignment of teachers to classes/subjects
+
+### Attendance
+- Daily attendance tracking per class/subject
+- Status tracking (Present, Absent, Late, etc.)
+- Guardian notification modes with support for daily attendance digest emails
+- **Reports & Analytics**: Comprehensive reporting system with visual charts
+  - Filter by date range, classroom, subject, student, and status
+  - Daily trend visualization using Chart.js
+  - Status distribution pie charts
+  - Student absence tracking (identify students with most absences)
+  - Export reports to CSV or PDF format
+  - Dashboard widget showing 7-day attendance summary
+
+### API & Integrations
+- **Core JSON API (`/api/v1/`)** for SIS data access:
+    - `GET/POST /api/v1/students/`
+    - `GET/PATCH/PUT/DELETE /api/v1/students/<id>/`
+    - `GET /api/v1/classrooms/`
+    - `GET /api/v1/subjects/`
+    - `GET/POST /api/v1/attendance/`
+    - `GET/POST /api/v1/grades/`
+- **Calendar Sync Feed**: iCalendar export at `/calendar/feed.ics`
+
 ## Useful Commands
 - `python manage.py check` – configuration validation
 - `python manage.py test` – Django test suite
+- `python manage.py send_attendance_daily_digest` – sends daily digest emails for guardians in digest mode (defaults to previous day)
+- `python manage.py send_attendance_daily_digest --date YYYY-MM-DD` – sends digest for a specific day
+- `python manage.py send_attendance_daily_digest --start-date YYYY-MM-DD --end-date YYYY-MM-DD` – sends digest for a specific date range
 - `python manage.py shell_plus` – (if you add `django-extensions`) advanced shell
+
+Scheduling note: run the digest command once per day using your scheduler of choice (cron on Linux or Task Scheduler on Windows).
 
 ## Deployment Notes
 - Configure `DJANGO_ALLOWED_HOSTS`, `DJANGO_SECRET_KEY`, and `DJANGO_DEBUG` via environment variables.

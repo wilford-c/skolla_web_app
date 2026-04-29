@@ -8,63 +8,51 @@
             <p class="page-label">Enrollment</p>
             <h2 class="panel-title">Student Roster</h2>
         </div>
-        {% if can_create_students %}
-            <a class="btn btn-primary" href="{% url 'students:create' %}">Add Student</a>
-        {% endif %}
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            {% if can_manage_students %}
+                <a class="btn btn-neutral" href="{% url 'students:export' %}">Export CSV</a>
+                <a class="btn btn-neutral" href="{% url 'students:import' %}">Import CSV</a>
+            {% endif %}
+            {% if can_create_students %}
+                <a class="btn btn-primary" href="{% url 'students:create' %}">Add Student</a>
+            {% endif %}
+        </div>
     </div>
+    
+    <!-- HTMX-powered live search -->
+    <div style="padding: 1rem;">
+        <input 
+            type="search" 
+            name="search" 
+            placeholder="Search students by name, admission number, or guardian..."
+            class="form-input"
+            style="max-width: 500px;"
+            hx-get="{% url 'students:search' %}"
+            hx-trigger="input changed delay:300ms, search"
+            hx-target="#student-table-body"
+            hx-indicator="#search-indicator"
+            autocomplete="off"
+        />
+        <span id="search-indicator" class="htmx-indicator" style="margin-left: 0.5rem; color: var(--text-secondary);">
+            Searching...
+        </span>
+    </div>
+    
     <div class="table-scroll">
         <table class="table">
             <thead>
                 <tr>
                     <th>Admission #</th>
                     <th>Name</th>
+                    <th>Classroom</th>
                     <th>Status</th>
                     <th>Guardian</th>
                     <th>Contact</th>
-                    {% if can_manage_students %}<th>Actions</th>{% endif %}
+                    {% if can_manage_students or can_view_enrollments %}<th>Actions</th>{% endif %}
                 </tr>
             </thead>
-            <tbody>
-                {% for student in students %}
-                    <tr>
-                        <td>{{ student.admission_number }}</td>
-                        <td>{{ student.full_name }}</td>
-                        <td>
-                            {% if student.status == student.Status.ACTIVE %}
-                                <span class="status-pill status-active">{{ student.get_status_display }}</span>
-                            {% elif student.status == student.Status.INACTIVE %}
-                                <span class="status-pill status-inactive">{{ student.get_status_display }}</span>
-                            {% else %}
-                                <span class="status-pill status-graduated">{{ student.get_status_display }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if student.guardian_user %}
-                                <span>{{ student.guardian_user.display_name }}</span>
-                                <small class="status-pill status-present" style="margin-left:0.25rem;">Portal</small>
-                                {% if student.guardian_name and student.guardian_name != student.guardian_user.display_name %}
-                                    <div class="field-help" style="margin-top:0.15rem;">Primary contact: {{ student.guardian_name }}</div>
-                                {% endif %}
-                            {% else %}
-                                {{ student.guardian_name }}
-                            {% endif %}
-                        </td>
-                        <td>{{ student.contact_phone|default:student.contact_email|default:'—' }}</td>
-                        {% if can_manage_students %}
-                            <td>
-                                <div class="table-actions">
-                                    <a class="btn btn-neutral btn-small" href="{% url 'students:update' student.pk %}">Edit</a>
-                                    <form method="post" action="{% url 'students:delete' student.pk %}">
-                                        {% csrf_token %}
-                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
-                        {% endif %}
-                    </tr>
-                {% empty %}
-                    <tr><td colspan="{% if can_manage_students %}6{% else %}5{% endif %}">No students found.</td></tr>
-                {% endfor %}
+            <tbody id="student-table-body">
+                {% include 'students/partials/student_rows.html' %}
             </tbody>
         </table>
     </div>

@@ -1,0 +1,50 @@
+{% for student in students %}
+    <tr>
+        <td>{{ student.admission_number }}</td>
+        <td>{{ student.full_name }}</td>
+        <td>{{ student.current_classroom|default:'—' }}</td>
+        <td>
+            {% if student.status == student.Status.ACTIVE %}
+                <span class="status-pill status-active">{{ student.get_status_display }}</span>
+            {% elif student.status == student.Status.INACTIVE %}
+                <span class="status-pill status-inactive">{{ student.get_status_display }}</span>
+            {% else %}
+                <span class="status-pill status-graduated">{{ student.get_status_display }}</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if student.guardian_user %}
+                <span>{{ student.guardian_user.display_name }}</span>
+                <small class="status-pill status-present" style="margin-left:0.25rem;">Portal</small>
+                {% if student.guardian_name and student.guardian_name != student.guardian_user.display_name %}
+                    <div class="field-help" style="margin-top:0.15rem;">Primary contact: {{ student.guardian_name }}</div>
+                {% endif %}
+            {% else %}
+                {{ student.guardian_name }}
+            {% endif %}
+        </td>
+        <td>{{ student.contact_phone|default:student.contact_email|default:'—' }}</td>
+        {% if can_manage_students or can_view_enrollments %}
+            <td>
+                <div class="table-actions">
+                    {% if can_view_enrollments %}
+                        <a class="btn btn-neutral btn-small" href="{% url 'students:enrollments' student.pk %}">Enrollments</a>
+                    {% endif %}
+                    {% if can_manage_students %}
+                        <a class="btn btn-neutral btn-small" href="{% url 'students:update' student.pk %}">Edit</a>
+                        <form method="post" action="{% url 'students:delete' student.pk %}"
+                              hx-post="{% url 'students:delete' student.pk %}"
+                              hx-confirm="Are you sure you want to delete this student?"
+                              hx-target="closest tr"
+                              hx-swap="outerHTML swap:1s">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </td>
+        {% endif %}
+    </tr>
+{% empty %}
+    <tr><td colspan="{% if can_manage_students or can_view_enrollments %}7{% else %}6{% endif %}">No students found.</td></tr>
+{% endfor %}

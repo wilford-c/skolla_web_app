@@ -1,0 +1,6 @@
+admission_number,first_name,last_name,date_of_birth,current_classroom_code,guardian_name,contact_email,contact_phone,status
+ST2026001,John,Smith,2010-03-15,G10A,Robert Smith,robert.smith@example.com,555-0101,ACTIVE
+ST2026002,Emma,Johnson,2011-07-22,G10A,Sarah Johnson,sarah.j@example.com,555-0102,ACTIVE
+ST2026003,Michael,Williams,2010-11-08,G9B,David Williams,d.williams@example.com,555-0103,ACTIVE
+ST2026004,Sophia,Brown,2012-01-30,G8C,Linda Brown,linda.brown@example.com,555-0104,ACTIVE
+ST2026005,James,Davis,2011-05-17,G8C,Patricia Davis,p.davis@example.com,555-0105,ACTIVE

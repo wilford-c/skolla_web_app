@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Custom Report Builder - Attendance{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar"></i> Custom Report Builder</h2>
+        <div>
+          <a href="{% url 'attendance:template_list' %}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> My Templates
+          </a>
+          <a href="{% url 'attendance:reports' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Reports
+          </a>
+        </div>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="row">
+        <!-- Report Configuration -->
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="fas fa-cog"></i> Report Configuration</h5>
+            </div>
+            <div class="card-body">
+              <form method="get" action="{% url 'attendance:report_builder' %}" id="reportForm">
+                
+                <!-- Load Template Section -->
+                {% if user_templates or shared_templates %}
+                <div class="mb-4">
+                  <label class="form-label fw-bold">Load Saved Template</label>
+                  <select class="form-select" id="templateSelect" name="load_template">
+                    <option value="">-- Select a template --</option>
+                    {% if user_templates %}
+                      <optgroup label="My Templates">
+                        {% for template in user_templates %}
+                          <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                      </optgroup>
+                    {% endif %}
+                    {% if shared_templates %}
+                      <optgroup label="Shared Templates">
+                        {% for template in shared_templates %}
+                          <option value="{{ template.id }}">{{ template.name }} (by {{ template.created_by.get_full_name }})</option>
+                        {% endfor %}
+                      </optgroup>
+                    {% endif %}
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-outline-primary mt-2">Load Template</button>
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Report Name -->
+                <div class="mb-3">
+                  {{ form.report_name.label_tag }}
+                  {{ form.report_name }}
+                  <small class="form-text text-muted">{{ form.report_name.help_text }}</small>
+                </div>
+
+                <!-- Field Selection -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Fields to Include</label>
+                  {{ form.fields }}
+                  <small class="form-text text-muted">{{ form.fields.help_text }}</small>
+                </div>
+
+                <!-- Filters -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Filters</label>
+                  
+                  <div class="row mb-2">
+                    <div class="col-6">
+                      <label class="form-label">Date From</label>
+                      {{ form.date_from }}
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label">Date To</label>
+                      {{ form.date_to }}
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Classroom</label>
+                    {{ form.classroom }}
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Subject</label>
+                    {{ form.subject }}
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Student</label>
+                    {{ form.student }}
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Status</label>
+                    {{ form.status }}
+                  </div>
+                </div>
+
+                <!-- Display Options -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Display Options</label>
+                  
+                  <div class="mb-2">
+                    <label class="form-label">Grouping</label>
+                    {{ form.grouping }}
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Sorting</label>
+                    {{ form.sorting }}
+                  </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Export Format</label>
+                  {{ form.export_format }}
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    {{ form.include_summary }}
+                    {{ form.include_summary.label_tag }}
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    {{ form.save_as_template }}
+                    {{ form.save_as_template.label_tag }}
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                  <button type="submit" name="action" value="preview" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Preview Report
+                  </button>
+                  <button type="submit" name="action" value="export" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export Report
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0"><i class="fas fa-table"></i> Report Preview</h5>
+            </div>
+            <div class="card-body">
+              {% if preview_records %}
+                <div class="alert alert-info">
+                  <strong>Total Records:</strong> {{ total_records }}
+                  <br>
+                  <small>Showing first 50 records for preview</small>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover table-sm">
+                    <thead class="table-dark">
+                      <tr>
+                        {% for field in form.cleaned_data.fields %}
+                          {% if field == 'date' %}<th>Date</th>{% endif %}
+                          {% if field == 'student_admission_number' %}<th>Admission #</th>{% endif %}
+                          {% if field == 'student_name' %}<th>Student Name</th>{% endif %}
+                          {% if field == 'classroom' %}<th>Classroom</th>{% endif %}
+                          {% if field == 'subject' %}<th>Subject</th>{% endif %}
+                          {% if field == 'status' %}<th>Status</th>{% endif %}
+                          {% if field == 'notes' %}<th>Notes</th>{% endif %}
+                          {% if field == 'recorded_by' %}<th>Recorded By</th>{% endif %}
+                          {% if field == 'recorded_at' %}<th>Recorded At</th>{% endif %}
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for record in preview_records %}
+                        <tr>
+                          {% for field in form.cleaned_data.fields %}
+                            {% if field == 'date' %}<td>{{ record.date }}</td>{% endif %}
+                            {% if field == 'student_admission_number' %}<td>{{ record.student.admission_number }}</td>{% endif %}
+                            {% if field == 'student_name' %}<td>{{ record.student.full_name }}</td>{% endif %}
+                            {% if field == 'classroom' %}<td>{{ record.classroom }}</td>{% endif %}
+                            {% if field == 'subject' %}<td>{{ record.subject|default:"N/A" }}</td>{% endif %}
+                            {% if field == 'status' %}
+                              <td>
+                                <span class="badge bg-{% if record.status == 'PRESENT' %}success{% elif record.status == 'ABSENT' %}danger{% elif record.status == 'LATE' %}warning{% else %}secondary{% endif %}">
+                                  {{ record.get_status_display }}
+                                </span>
+                              </td>
+                            {% endif %}
+                            {% if field == 'notes' %}<td>{{ record.notes|truncatewords:10 }}</td>{% endif %}
+                            {% if field == 'recorded_by' %}<td>{{ record.recorded_by.get_full_name|default:"System" }}</td>{% endif %}
+                            {% if field == 'recorded_at' %}<td>{{ record.recorded_at|date:"Y-m-d H:i" }}</td>{% endif %}
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+
+                {% if total_records > 50 %}
+                  <div class="alert alert-warning mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    Showing 50 of {{ total_records }} records. Export to see all data.
+                  </div>
+                {% endif %}
+
+              {% else %}
+                <div class="text-center text-muted py-5">
+                  <i class="fas fa-chart-line fa-3x mb-3"></i>
+                  <p class="lead">Configure your report settings and click "Preview Report" to see the data.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-submit when template is selected
+document.getElementById('templateSelect').addEventListener('change', function() {
+  if (this.value) {
+    document.getElementById('reportForm').submit();
+  }
+});
+</script>
+{% endblock %}

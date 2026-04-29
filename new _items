@@ -1,0 +1,484 @@
+Product Requirements Document: Alma-like K‑12 School Management SaaS
+Executive Summary
+We propose a cloud-native, multi-tenant Student Information System (SIS) and school management platform akin to Alma (https://www.getalma.com). The system will centralize student data and operations (enrollment, attendance, grading, scheduling, billing, communications, analytics, etc.) into a single integrated platform. This SaaS aims to “streamline operations and improve student outcomes”
+ by surfacing accurate, timely data for decision‑making
+. Key goals are to simplify administrators’ and teachers’ work (saving time and money), strengthen family/school communication, and enable data-driven leadership. The platform must support all K‑12 roles (school leaders, teachers, staff, parents, students, and state administrators
+), comply with regulations (FERPA, GDPR, accessibility), and scale to districts of any size. This PRD details the system’s personas, core functional/non‑functional requirements, data model, user flows, integration/API contracts, deployment, metrics, roadmap, benchmarking, and rough estimates.
+
+Target Users & Personas
+Primary Roles:
+
+District/School Leadership: Superintendents, principals, school heads, board members, assistant superintendents. Goals: Get high-level overviews of enrollment, achievement, budgets, and compliance; enforce policies; support strategic initiatives. Pain Points: Disparate systems, delayed reporting, lack of real‑time insights.
+School Administration: Registrars, counselors, student support, CFOs, data/reporting officers, state reporting coordinators, scheduling managers, IT directors. Goals: Accurately manage enrollment/admissions, student records, attendance, billing; prepare state/federal reports; maintain system configuration. Pain Points: Manual data entry, complex spreadsheets, integration overhead, regulatory audits.
+Teachers: Classroom teachers (elementary to high school), instructional assistants, paraeducators. Goals: Easily take attendance, enter grades (traditional or standards/competency-based), communicate with students/parents, track student progress. Pain Points: Clunky interfaces, juggling multiple tools (LMS, separate SIS, email), time spent on non-teaching tasks.
+Support Staff: Specialists (counselors, nurses, librarians, transportation, food service). Goals: Log incidents, manage health records, track extra‑curriculars, coordinate services. Pain Points: No unified view of student needs, siloed software.
+Students: Learners from PreK–12. Goals: View schedules, assignments, grades, and communicate with teachers; engage in competency/standards tracking. Pain Points: Inconsistent access to their data, difficulty tracking progress outside of class.
+Parents/Guardians: Family contacts of students. Goals: Monitor child’s attendance, grades, fees, and school communications; pay fees online. Pain Points: Lack of clear visibility, multiple logins for portals, delayed notifications.
+These personas align with Alma’s emphasis on leadership, teaching & learning, administration, and state-level users
+. For example, Alma explicitly supports “superintendents, principals, board members…students, parents/guardians, counselors, IT directors” and more
+. Our platform must likewise tailor its UI and features to each role’s needs (e.g. dashboards for leaders, gradebook for teachers, portals for parents).
+
+Core Features & Functional Requirements
+1. Student Information System (Core SIS)
+Student Records: Centralized profiles for each student, capturing biographic data, demographics, enrollment status, programs (e.g. special education), family/household data, medical and immunization records, health alerts (“critical flags”), and custom fields
+. Each record should support document attachments (a “virtual file cabinet” of student documents) and strict data privacy (FERPA).
+Households & Contacts: Model one-to-many household relations: students linked to parent/guardian contacts (with addresses, communications prefs) and emergency contacts
+. One guardian may be linked to multiple students.
+Staff/Personnel: Central directory of all staff (teachers, admins, support), with roles/permissions. Staff have profiles with assignments (courses taught, etc.) and privileges for data access.
+Courses & Programs: Define academic programs, courses and cohorts. Support flexible groupings (e.g. clubs, sports teams) as needed for mass messaging or roster-building.
+Source: Alma’s core SIS handles “biographical data, program data, medical details, immunizations, critical flags…a virtual file cabinet”
+. The platform emphasizes a “centralized space” for these essentials
+.
+
+2. Enrollment & Admissions
+Online Application/Registration: Allow new/existing student applications, online forms, secure document uploads (transcripts, IDs), and automated notifications (application received, accepted, etc.)
+. Support re-enrollment/continuation of existing students and waitlists if needed.
+Automated Processes: Workflows for admissions review (approve/deny), fee waivers, and communications to families.
+Pre-built State Profiles: Include fields required by state agencies, with push-button generation of state-specific reports
+. Validate data against state schema to ensure compliance.
+Source: Alma lists “Registration, Re-enrollment, Applications & admissions, Secure document upload, Notifications & alerts” under Enrollment & Admissions
+, highlighting these as built-in features.
+
+3. Attendance Management
+Flexible Attendance: Record daily or class-period attendance, supporting positive (present) and negative (absent, tardy, excused/unexcused) methods
+.
+Advanced Tracking: Automatic truancy reports; seating charts for classroom assignments; absence alerts to parents/guardians and staff (email/SMS notifications).
+Analytics: Dashboards/reporting for attendance trends, chronic absenteeism, by student or cohort.
+Source: Alma’s SIS includes “Positive & negative attendance, Attendance reporting, Attendance notifications, Truancy reports, Seating charts”
+.
+
+4. Grading & Academic Records
+Gradebook: Teachers can enter assignment scores and grades. Supports both traditional grading (percentage, points, letter grades) and standards/competency-based models
+. Automatic roll-ups calculate class grades and GPA (including flexible calculations). Teachers see a “human-readable gradebook” UI
+.
+Assignments: Create/manage assignments, due dates, weightings. Track missing submissions.
+Reports & Transcripts: Generate official report cards, transcripts, enrollment history records, honor rolls. Import legacy grades/GPA for new enrollees. Configurable transcript templates and standards-based report cards
+.
+Academic History: Maintain permanent academic records per student, adaptable to any grading scale or college-equivalence for transcripts.
+Source: Alma features “Calculated class grades, Assignment management, Missing assignments”
+ and “Transcripts, Report cards, Enrollment history, Flexible GPA calcs”
+.
+
+5. Scheduling & Course Management
+Course Catalog & Requests: Define courses, sections, and terms. Allow students to request courses or electives via portal; teacher/course prerequisites.
+Schedule Generation: Tools for building bell schedules and assigning students to sections (automated scheduler for core classes, walk-in scheduling for new students)
+. Support complex scenarios (multi-teacher courses, block scheduling).
+Graduation Requirements: Track diploma requirements per student, flag completed vs missing credits.
+Resource Constraints: Manage room/teacher availability to avoid conflicts.
+API Synchronization: Expose schedule data for use by LMS or calendar systems.
+Source: Alma lists “Advanced scheduling, Walk-in scheduling, Graduation tracking, Course & class management, Course requests” as core scheduling features
+.
+
+6. Communication & Portals
+Messaging: Integrated messaging between any parties. Teachers can send messages/announcements to individual students or entire classes. Staff/admin can message groups (grade-levels, clubs, etc.) or individual households. Support email, SMS/text, and in-app notifications
+. Enable two-way messaging (students/parents can reply or initiate).
+Alerts/Notifications: Configurable alerts for attendance issues, missing assignments, low grades, billing notices, etc. Parents/students receive timely updates via chosen channels.
+Portals: Secure web and mobile portals for Parents and Students (single sign-on) to view schedules, grades, attendance, assignments, fee balances, and communications
+. Portals should be multilingual. The parent portal can also handle fee payments (link to billing module).
+Mobile Interface: A responsive mobile app or web UI so teachers can mark attendance and grade on tablets/phones
+, and families can access info on-the-go. Alm a mentions a “mobile interface” in its features
+.
+Source: Alma includes “Student, staff, household messaging; Group messaging; Teacher-to-student messaging; Text alerts; Parent & student portals; Mobile interface”
+.
+
+7. Billing & Finance
+Fee Management: Support arbitrary fee types (tuition, activity fees, lunches, fundraisers). Assign fees at district, school, program, or per-student level
+.
+Invoice Plans: Generate recurring tuition plans, installments, sibling discounts, and waivers.
+Payments: Integrated payment processing: accept credit cards and ACH on portal. Track cash/check payments and reconcile. Automatic posting of payments to student accounts
+.
+Reporting: Accounts receivable ledger, aging reports, delinquencies, and statements for families.
+Source: Alma’s Fee Management module supports “any type of fees, credit card/ACH collection, cash tracking, with parent portal access”
+.
+
+8. Reporting & Analytics
+Prebuilt Reports: Standard reports (attendance audits, grade summaries, transcripts, state compliance reports) are provided out-of-the-box
+. Must cover all required state/federal reports, and allow exporting to required formats (CSV, XML, etc.).
+Custom Reporting: Ad-hoc report builder for administrators to join any data (students, courses, finance, etc.) with filters and scheduling. Ability to create dashboards with charts (attendance trends, grade distributions, dropout rates, etc.).
+Business Intelligence: Embedded data analytics tool (like Alma’s “Data Lab”) and support for external BI/EDW: e.g. OData or API extracts for Power BI/Tableau.
+Alerts & Metrics: System-wide dashboards showing live metrics (daily attendance percentage, recent behavior incidents, upcoming events).
+Source: Alma emphasizes “Build-your-own reporting, Custom reporting, Embedded data visualizations, BI tool connector”
+ as part of its analytics/operational suite. It also touts a “pre-built analytics package” (Data Lab) for insights
+.
+
+9. Integrations & APIs
+Prebuilt Connectors: Out-of-the-box integrations with common educational tools: Google Classroom, Microsoft Teams, Canvas/Schoology/Moodle LMS, library systems, transportation, meal services, etc. (Alma advertises “125+ push-button integrations” including Google Classroom and many LMS)
+.
+Standards Support: Implement IMS Global OneRoster for automated roster/course sync
+, LTI for deep links to external learning tools, and Ed-Fi (or state-specific standards) for data exchange. Provide SFTP and REST API endpoints for SIS data export/import (rosters, grades, attendance).
+APIs: A comprehensive RESTful API for all core data entities. For example, endpoints to GET/POST students, classes, attendance records, grades, etc., returning JSON. (See Sample API Contract below.) Support OAuth 2.0 or API keys for authentication.
+Calendar: Sync school calendars (holidays, events, bell schedules) to external calendars (iCalendar feeds) or Google/Outlook.
+SSO: Support single sign-on via SAML or OAuth2.0 (e.g. Microsoft Azure AD, Google) for staff, and integration with Google/Microsoft student accounts (Alma is a Google Education partner
+).
+Payments: Integrate with payment gateways (Stripe, Authorize.Net, PayPal) for online billing.
+Source: Alma’s “Preconfigured integrations” bullet list explicitly mentions “125+ push-button integrations; Google Classroom; numerous LMS integrations; Public APIs; OneRoster”
+. A 2017 press release notes Alma is “OneRoster-compliant” and “can easily and seamlessly integrate with any third-party application”
+.
+
+10. User Experience & Accessibility
+Intuitive UI: Clean, modern web interface designed for non‑technical educators. Draggable “human-readable” gradebooks, clear dashboards, and guided setup (Alma’s marketing emphasizes ease-of-use
+).
+Multi-platform: Web app built in responsive design (mobile-friendly) plus optional iOS/Android app for parents/teachers. Alma stresses that SIS should be as intuitive as consumer apps
+.
+Role-based Dashboards: Upon login, users see a dashboard tailored to their role (e.g. teachers see their classes and tasks; principals see school metrics; parents see child’s summary). Widgets provide at-a-glance info (today’s roster, absent students, pending admissions, etc.).
+Customization: Allow users to rearrange or configure certain views. Support multiple languages (Alma provides language preferences)
+. Accessibility compliance (WCAG 2.1 AA; Section 508) is mandatory for all interfaces.
+In-App Help: Contextual help icons, tutorials and “bootcamp” video library for training (as Alma provides
+).
+Source: The Alma-focused blog by an ed-leader praises the ease-of-use: “Alma’s tools and ease of use can save [teachers] time… [Educators] deserve this”
+. Alma’s feature list explicitly mentions “Users choose their own language”
+.
+
+11. Security and Compliance
+Authentication: Support multi-factor authentication (MFA) for all user logins
+. Enforce strong password policies. SSO via SAML/OAuth as noted.
+Authorization: Fine-grained, role-based access control. Admins can create custom roles and granular permissions
+. Every data record and action must check permissions to ensure confidentiality (e.g. teachers see only their students’ records).
+Encryption: All data in transit over HTTPS (TLS 1.2+) and sensitive data at rest encrypted (database and file storage).
+Standards Compliance:
+Follow FERPA requirements for student records (audit trails of who viewed/edited student data, consent controls for directory info).
+Comply with COPPA (parental consent for <13 accounts) if applicable.
+For any EU student data, comply with GDPR (Alma displays a GDPR badge
+) – e.g. data portability, deletion on request.
+If handling payments, meet PCI DSS standards for card data (though likely we use tokenized gateway).
+Internationalization/local laws as needed for e.g. UK (Data Protection Act), etc.
+Security Framework: Adopt industry frameworks (e.g. NIST 800-53, SOC2)
+. Alma notes it follows “NIST 800-53 guidelines”
+. Perform annual risk assessments/BIA and regular security audits.
+Incident Response: Tools for logging/reporting data breaches or incidents. Logging of system events and user actions (who changed what).
+Uptime/Availability: Designed for 24×7 operation with high reliability. Alma aims for “99.99% scheduled uptime”
+. The system should support rolling deployments (no downtime upgrades) and rapid rollback if needed.
+12. Administration & Configuration Tools
+Bulk Data Tools: Spreadsheet-like editors for fast data changes, bulk import via CSV with validation (e.g. roll enrollment lists, grades, etc.)
+. Undo/redo or transaction logs for bulk operations.
+Mailing Labels & Notifications: Generate labels, lists, or email lists for mailing to groups (by class, grade, custom filter).
+Custom Fields & Forms: Administrators can create additional data fields on student/staff forms and build custom form-based workflows (e.g. permission slips, incident forms)
+.
+User/Role Management: GUI for managing users (add/edit), assign roles, define permissions. Unlimited custom roles allowed
+.
+Configurability: Manage school calendars (terms, bell schedules), grading scales, attendance codes, fee schedules, email templates.
+Dashboards & Reports for Admins: System-wide analytics (e.g. system usage, integration status, SLA uptime) and “command center” views at district level
+.
+Source: Alma’s “Data administration” includes “Spreadsheet editing, bulk uploads with validation, bulk editing, mailing labels, robust reporting”
+. Their customization features include “custom roles & permissions” and form/workflow builders
+. Application administrative views cover “district & school dashboards, class/schoolwide views, district command-&-control”
+.
+
+Non-Functional Requirements
+Scalability: The system must elastically scale to serve small schools (hundreds of students) and large districts (100,000+ students). Use multi-tenant architecture so new school customers can be onboarded without dedicated servers, but with logical isolation of data. Support horizontal scaling of stateless services and vertical scaling for the database as needed.
+Performance: Typical page/API response time < 2 seconds under normal load. Peak loads (e.g. start-of-day check-in or grading submission) should not degrade service significantly. Batch operations (state reports, transcripts generation) should complete within acceptable time (minutes, not hours).
+Availability: Target at least 99.9–99.99% uptime (Alma commits to “99.99% scheduled uptime”
+). Plan for high availability (multi-AZ deployment on cloud, redundant failover instances, automated recovery). Define maintenance windows with minimal impact.
+Reliability: Graceful degradation: if a service (e.g. analytics server) fails, core SIS remains operational. Automated health checks, alerts, and self-healing (auto-restart).
+Data Retention: Retain all operational data (student records, grades, transcripts, etc.) for legal or policy-required durations (typically 7+ years after last enrollment; many districts keep indefinitely). Ensure data backups (daily snapshots, replication) with retention policy (e.g. 1 year of daily backups, 7 years of monthly backups). Easily restore individual records or full databases.
+Compliance: Adherence to legal standards as above (FERPA, COPPA, etc.). Provide audit logs for compliance audits. Ensure data subject rights (GDPR) by design.
+Security: As above, follow best practices (code reviews, penetration testing). Use secure development lifecycle.
+Accessibility: Conform to WCAG 2.1 AA or higher. Ensure screen-reader compatibility, keyboard navigation, color contrast, etc. Alma’s site links an “Accessibility Pledge”
+, implying such commitment.
+Localization: Support multiple languages (English + at least Spanish for US market, possibly more for international customers). Date/time/currency formats configurable.
+Maintainability: Modular code, automated tests, CI/CD pipeline for deployments every 1–2 weeks (Alma does biweekly releases
+). Monitor code quality and technical debt.
+Supportability: Provide logging, monitoring (metrics on API usage, errors, load) and admin UIs to view logs/metrics. Use industry tools (Prometheus, ELK, New Relic, etc.) for real-time monitoring.
+Data Model (ER Diagram)
+contains
+
+enrolls
+
+employs
+
+offers
+
+has
+
+consists_of
+
+contains
+
+teaches
+
+has
+
+logs
+
+receives
+
+involved_in
+
+incurs
+
+is_paid_by
+
+DISTRICT
+
+SCHOOL
+
+STUDENT
+
+STAFF
+
+COURSE
+
+ENROLLMENT
+
+SECTION
+
+GUARDIAN
+
+ATTENDANCE
+
+GRADE
+
+INCIDENT
+
+FEE
+
+PAYMENT
+
+
+
+Show code
+Entity Highlights:
+
+District/School: Hierarchy so one district can have many schools.
+Student/Staff: People entity split into roles. Students enroll at schools; staff are assigned courses.
+Course/Section/Enrollment: Courses (e.g. Algebra) have multiple Sections (Algebra–Sec 1). Students join a Section via an Enrollment record, which in turn links to attendance records and grades. Sections also link to the Staff (teacher).
+Guardian: Connects adult contacts to students (many-to-many possible; drawn simply here).
+Attendance, Grade, Incident, Fee, Payment: Track attendance events, grade entries, discipline incidents, financial obligations, and payments per student/enrollment.
+This abstract ERD represents the relational data model needed to support core SIS functions. (Refer to Alma’s documentation for more detailed schemas.)
+
+User Flows & Wireframes
+Enrollment Workflow (Sample Flowchart)
+No
+
+Yes
+
+Approved
+
+Denied
+
+User opens Online Application Form
+
+All required fields filled?
+
+Prompt user to complete fields
+
+Submit application
+
+Admin reviews application
+
+Decision
+
+Create student record; set status=Enrolled
+
+Record decision and notify applicant
+
+Generate welcome emails & account credentials
+
+Student accesses parent portal to finish registration
+
+
+
+Show code
+This flow illustrates how a new student application is processed: entering data online, administrative review, creation of SIS record, and notification.
+
+Attendance & Notification Flow
+Yes
+
+No
+
+Teacher logs in
+
+Select class section & date
+
+Mark students present/absent
+
+Absent students exist?
+
+Automated message to each absent student’s guardian
+
+Confirm submission
+
+System saves attendance record
+
+
+
+Show code
+Teachers use a class attendance screen (wireframe) to mark each student. On submit, the system logs the records and notifies guardians of any unexcused absences.
+
+Sample Wireframe Descriptions
+Teacher Dashboard: Shows today’s classes, upcoming assignments to grade, quick links to attendance and gradebook for each class. Example: a tabbed interface with “Classes – Attendance – Grades – Messages.”
+Gradebook Page: Spreadsheet-like view listing students and assignments; editable cells for scores. Filters to show by category or date. Button to “Publish grades” to student portals.
+Parent Portal: A clean page listing each child’s recent attendance summary, a link to report card PDF, outstanding fees, and a message inbox. Mobile-responsive layout.
+Scheduling Interface: Drag-and-drop timetable builder for administrators. Students have a “Course Request” form to pick electives.
+Admin Reports Dashboard: Charts for enrollment trends, attendance rates, billing summary. Buttons to generate new report or export data.
+(NOTE: These are conceptual; actual UI design would follow UX best practices and style guide.)
+
+API & Integration Specifications
+All integrations use HTTPS/RESTful APIs with JSON. The platform will expose endpoints under /api/v1/*. Authentication is via OAuth 2.0 Bearer tokens or API keys. Below are sample API contracts:
+
+http
+Copy
+GET /api/v1/students/12345
+Authorization: Bearer <token>
+Accept: application/json
+Response (200 OK):
+
+json
+Copy
+{
+  "studentId": 12345,
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "dob": "2012-06-15",
+  "gender": "F",
+  "gradeLevel": "5",
+  "schoolId": 10,
+  "status": "Active",
+  "contacts": [
+    {"type": "Parent", "name": "John Doe", "email": "john.doe@example.com"}
+  ],
+  "programs": ["General Education"],
+  "enrollmentDate": "2021-08-20"
+}
+http
+Copy
+POST /api/v1/attendance/records
+Content-Type: application/json
+Authorization: Bearer <token>
+Request Body: (batch create/update)
+
+json
+Copy
+{
+  "sectionId": 567,
+  "date": "2026-09-01",
+  "records": [
+    {"studentId": 12345, "status": "Present"},
+    {"studentId": 67890, "status": "Absent", "reason": "Tardy"}
+  ]
+}
+Response (201 Created): Attendance records saved with identifiers.
+
+http
+Copy
+GET /api/v1/grades?studentId=12345&period=2026-Fall
+Returns all grade records for the student in that term.
+
+Payment Gateway Integration: We’ll integrate a service like Stripe via their webhook API. For example, upon invoice payment:
+
+http
+Copy
+POST /webhooks/stripe
+Content-Type: application/json
+Payload example (Stripe sends event with customer/amount/etc), which we parse to reconcile student fee payment in our system.
+
+OneRoster/LMS Sync: Conform to the IMS OneRoster 1.1 JSON schema. E.g. our SIS will POST to /api/ims/oneroaster/v1p1/ endpoints with the district’s token. (Alma provides OneRoster endpoints for class rosters.) This allows partner apps to pull student lists and classes.
+
+Calendar Feeds: Expose iCalendar (.ics) endpoints for public school calendar and individual schedules, so teachers can subscribe in Google/Outlook.
+
+Deployment, Hosting, Backup & Monitoring
+Cloud Infrastructure: Use a major cloud provider (AWS/GCP/Azure) with containerized microservices (e.g. Docker + Kubernetes or serverless functions). Key services: Web frontend, API backend (e.g. Node/Java/.NET), relational database (PostgreSQL or SQL Server), file storage (S3-compatible) for documents.
+Redundancy & Scaling: Deploy across multiple availability zones. Use managed services for DB with read replicas. Auto-scale web/API tiers based on CPU/memory. Use a global CDN for static assets and portal delivery.
+Continuous Delivery: CI/CD pipeline for builds and deployments; automated testing (unit/integration) and blue/green deployment. Alma mentions iterative releases every 2 weeks
+. We’ll adopt a similar agile cadence for updates.
+Backups & DR: Daily database backups retained (e.g. 30 days). Long-term backups (weekly/monthly) for compliance retention (years). Off-site replication for disaster recovery. Define RPO/RTO (e.g. RPO=4 hours, RTO=2 hours) and test drills.
+Logging & Monitoring:
+Application Monitoring: Instrument APIs with Prometheus/Grafana for real-time metrics (error rates, latency, throughput).
+Uptime Monitoring: External health checks (Pingdom/New Relic) to verify service endpoints are reachable (target 99.9%). Alma guarantees “cloud-native” high availability
+.
+Logging: Central log aggregation (ELK/Stackdriver) for audits and troubleshooting. Security logs for all user actions.
+Alerts: Set thresholds (e.g. CPU > 80%, error rate spikes) to trigger alerts to on-call devops.
+Support Environments: Separate development, staging, and production environments. Data masking in non-prod.
+Metrics, KPIs & Success Criteria
+To measure success and guide decisions, the following metrics should be tracked:
+
+System Performance: API response times (p90 < 1s), page load times. Uptime percentage (aim ≥ 99.9% monthly). SLA compliance (time to restore, etc.).
+Adoption & Usage: Percentage of teachers actively using gradebook/attendance features; daily/monthly active users (by role); number of parent/students logging in. Target high adoption (e.g. ≥ 80% of teachers using core modules).
+Data Quality: Rate of incomplete records (e.g. % of students without contact info).
+Operational Efficiency: Time saved vs. previous solution (e.g. average time to take attendance or produce a report). Can be measured in user surveys post-implementation.
+Engagement: Volume of messages sent through system (e.g. number of parent messages).
+Financial Metrics: Fees collected on time, reduction in late payments.
+Customer Satisfaction: Survey-based NPS from staff and parents, support ticket resolution time.
+Project Metrics: Implementation milestones met (on-time delivery of MVP features).
+Phased Roadmap and MVP Scope
+A phased rollout ensures core functionality is delivered quickly while advanced features come later.
+
+Phase	Features / Modules	Notes / Acceptance Criteria
+MVP (Phase 1)	Core SIS: Student/Staff directory, enrollment/admissions, basic attendance, traditional gradebook, class scheduling (simple), parent/student portal, basic messaging, custom roles/permissions, data admin (imports), fundamental reports (transcripts, attendance logs).	- AC: Admin can add students/staff, assign class sections, take attendance, enter grades, generate report cards. Parents log in to see schedule/grades. Teachers send messages to class. All data saved and visible appropriately.
+Phase 2	Advanced Scheduling (automated scheduler, student course requests), Competency/Standards Grading, Progress Tracking (skills, standards reports)
+, full fee management & online payments, document uploads, enhanced custom forms (e.g. incident reports), bulk mailing tools, mobile-responsive UI refinements.	- AC: Students complete course request form; system generates schedules. Teachers create rubric-based grading and standards-based report cards. Parents pay a fee online and receive receipts.
+Phase 3	Robust Reporting & Analytics (custom dashboards, BI connector), 125+ integrations (Google Classroom, LMS, calendar), App Center for self-service app integration
+, multi-language support (Spanish UI), single sign-on setup, state reporting modules, domain-level admin views, high-availability enhancements (auto-scaling).	- AC: Data Lab or similar provides dashboards. District admin can install a new integration via App Center. State report can be exported with required fields. Multi-Factor Auth and SSO are enabled.
+
+Product Backlog (Example Stories):
+
+“As a registrar, I want to bulk-import new students from Excel so that I can quickly update enrollments.” (AC: CSV import wizard validates fields and creates records.)
+“As a teacher, I want to mark all tardy students with one click so I can efficiently log attendance.” (AC: Attendance page with quick-mark options.)
+“As a principal, I want to see a dashboard of daily attendance percentages so I can monitor school-wide trends.”
+“As a parent, I want to receive an SMS if my child is marked absent so I’m immediately aware.” (AC: System sends text to guardian when absence recorded.)
+The MVP focuses on core administrative and classroom workflows; later phases introduce analytics, integrations and scalability features. Alma’s own implementation cadence (iterative two-week releases
+) suggests delivering small increments continuously.
+
+Competitive Feature Benchmarking
+We compare our planned features against major K-12 SIS competitors (e.g. PowerSchool, Infinite Campus, Skyward):
+
+Feature / Category	Alma-like SIS	PowerSchool	Infinite Campus	Skyward
+Core SIS	Full student database, custom fields, virtual file cabinet
+.	Yes, comprehensive (“Activities, adult contacts, health, custom fields”)
+.	Yes, all in one system.	Yes, core modules (demographics, scheduling)
+.
+Attendance	Daily & period, tardies, truancy alerts
+.	Extensive (daily periods, SMS alerts, proxies)
+.	Yes (with dashboards)	Yes, with reporting.
+Grading	Traditional + competency grading; GPA calc; standards-based report cards
+.	Traditional & standards; built-in gradebook, IB support
+.	Yes (in LMS add-on)	Standards & traditional.
+Scheduling	Automatic schedulers; course requests
+.	Flexible scheduling engine, online requests
+.	Robust core scheduling.	Interactive scheduler.
+Reporting & Analytics	Custom reports, BI connector, live dashboards (Data Lab)
+.	Built-in reporting; SIS analytics suite (powerful dashboards).	Integrated data suite addons.	Standard & state reports.
+Integrations	125+ integrations, OneRoster/LMS, Google Classroom
+.	LMS sync (Schoology, Canvas), Ed-Fi, SAML, many partners.	Diverse add-ons (Food Service, LTI).	Has some LMS sync, limited.
+User Portals	Parent/Student portal (multi-language)
+. Mobile app interface.	Student/parent web portals and mobile app.	Unified parent/student app.	Parent portal & app.
+Customization	Unlimited fields, forms, roles, workflows
+.	Highly configurable (API, unlimited fields)
+.	Good (custom reports, fields).	Configurable for school needs.
+Security/Compliance	Cloud-native; NIST 800-53, MFA
+; GDPR-aware
+.	SOC 2 compliant; SAML/SSO; data encryption
+.	FERPA/GDPR compliance options.	Yes (role-based security).
+Pricing Model	SaaS subscription (varies by district size).	Subscription (per student) or on-prem.	Subscription or SaaS.	Subscription or on-prem.
+Deployment	Cloud (AWS/GCP); multi-tenant by school/district.	Cloud or self-host; originally on-prem (Oracle DB).	Cloud SaaS multi-tenant.	Often hosted (SaaS), some districts on-prem.
+
+Notes: All major SIS platforms cover the basics (student database, attendance, grading, scheduling, state reporting, parent portals, security). Alma’s differentiators are extensive out-of-the-box integrations and analytics, plus an educator-centric UI. Our system should aim to match and exceed competitor offerings in flexibility, analytics, and usability.
+
+Effort & Cost Estimates
+For a US K‑12 SaaS solution:
+
+Development Effort: A full-featured SIS is a multi-year engineering effort. Roughly 20–30 person-years of development time (for a lean team) to build and polish all modules. At ~$150k per engineer/year (including benefits), that is on the order of $3–5 million initial dev labor. Continuous improvement afterwards (bugfixes, new features) would be additional. Many SIS vendors evolve products over 5–10 years.
+Infrastructure: Cloud hosting for a district of ~10,000 students might cost $10k–$30k per year (compute, storage, bandwidth, backups). Multi-district SaaS scales with number of tenants.
+Ongoing Support: Annual costs include maintenance, support staff, and updates. For a SaaS company, support is ~10–15% of license revenue.
+Pricing Benchmark: Commercial SIS pricing often runs $10–$50 per student per year (higher-ed can be cheaper per student, K-12 costs more due to scale and integration). For example, small schools can find SIS for ~$2k–$10k/year
+, but large districts pay substantially more (e.g. $50–$100K+/year). Implementation services (data migration, training) can add significant one-time cost.
+MVP Timeline: Building the MVP (Phase 1) with a ~10‑person agile team could take 6–9 months of development (assuming parallel tracks for frontend, backend, and QA). A small school could pilot core features in ~4–6 weeks as per some vendors
+, but a district-wide rollout typically spans many months of planning and training.
+These are rough estimates; actual costs depend on team productivity, tech stack, and third‑party services used. Partnering with experienced SIS vendors can reduce time but adds licensing costs.
+
+References
+Alma SIS official features and content
+.
+Alma Blog: SIS selection factors (UX, integrations, security)
+.
+Alma press releases and docs on integrations (OneRoster)
+.
+Software reviews: Alma SIS overview
+.
+Competitive SIS documentation (PowerSchool flyers
+; Infinite Campus marketing
+).
+SIS industry guides (SchoolCues ROI/cost guide
+).
+U.S. Department of Education: FERPA regulations (student privacy).
+These sources informed the requirements and feature list. All cited materials are authoritative descriptions or analyses of SIS features and best practices in K‑12 software.

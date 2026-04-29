@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Attendance Digest</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #0f766e;
+            color: white;
+            padding: 18px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+        }
+        .content {
+            border: 1px solid #d1d5db;
+            border-top: none;
+            padding: 24px;
+            background: #f8fafc;
+        }
+        .student-section {
+            margin-top: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .student-title {
+            background: #ecfeff;
+            padding: 10px 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+        th {
+            color: #334155;
+            font-weight: 600;
+            background: #f8fafc;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0; font-size: 22px;">Daily Attendance Digest</h1>
+        <p style="margin: 6px 0 0;">{{ digest_label }}</p>
+    </div>
+    <div class="content">
+        <p>Dear {{ guardian_name }},</p>
+        <p>Here is your attendance digest summary for the selected period.</p>
+
+        {% for group in grouped_students %}
+        <div class="student-section">
+            <div class="student-title">{{ group.student.full_name }} ({{ group.student.admission_number }})</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Classroom</th>
+                        <th>Subject</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in group.rows %}
+                    <tr>
+                        <td>{{ row.date }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ row.classroom }}</td>
+                        <td>{{ row.subject|default:'-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        <p style="margin-top: 18px;"><strong>Total attendance events:</strong> {{ total_events }}</p>
+        <p>Best regards,<br><strong>Skola School Management</strong></p>
+    </div>
+    <div class="footer">
+        This is an automated message. Please do not reply to this email.
+    </div>
+</body>
+</html>

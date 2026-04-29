@@ -1,0 +1,24 @@
+Dear {{ guardian_name }},
+
+This is an automated notification from Skola school management system.
+
+Student Information:
+--------------------
+Name: {{ student.full_name }}
+Admission Number: {{ student.admission_number }}
+
+Attendance Details:
+------------------
+Date: {{ date }}
+Status: {{ status }}
+Classroom: {{ classroom.name }}
+{% if subject %}Subject: {{ subject.name }}{% endif %}
+{% if notes %}Notes: {{ notes }}{% endif %}
+
+If you have any questions or concerns, please contact the school office.
+
+Best regards,
+Skola School Management System
+
+---
+This is an automated message. Please do not reply to this email.

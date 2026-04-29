@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Grades · Skola{% endblock %}
+{% block page_title %}Student Grades{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Performance Tracking</p>
+            <h2 class="panel-title">Grade Records</h2>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            {% if can_enter_grades %}
+                <a class="btn btn-neutral" href="{% url 'academics:grade_bulk_entry' %}">Bulk Entry</a>
+                <a class="btn btn-primary" href="{% url 'academics:grade_create' %}">Enter Grade</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <form method="get" class="filter-bar" style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <div>
+            <label>Subject</label>
+            <select name="subject" onchange="this.form.submit()">
+                <option value="">All Subjects</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if selected_subject|stringformat:"s" == subject.id|stringformat:"s" %}selected{% endif %}>
+                        {{ subject.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Student</label>
+            <select name="student" onchange="this.form.submit()">
+                <option value="">All Students</option>
+                {% for student in students %}
+                    <option value="{{ student.id }}" {% if selected_student|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
+                        {{ student.full_name }} ({{ student.admission_number }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Assessment</label>
+            <select name="assessment" onchange="this.form.submit()">
+                <option value="">All Assessments</option>
+                {% for assessment in assessments %}
+                    <option value="{{ assessment.id }}" {% if selected_assessment|stringformat:"s" == assessment.id|stringformat:"s" %}selected{% endif %}>
+                        {{ assessment.name }} - {{ assessment.subject.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Assessment</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Letter</th>
+                    <th>Entered By</th>
+                    {% if can_manage_grades %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'academics:student_grades_detail' grade.student.id %}">
+                                {{ grade.student.full_name }}
+                            </a>
+                        </td>
+                        <td>{{ grade.assessment.name }}</td>
+                        <td>{{ grade.assessment.subject.name }}</td>
+                        <td><strong>{{ grade.score }}/{{ grade.assessment.max_score }}</strong></td>
+                        <td>{{ grade.percentage|floatformat:1 }}%</td>
+                        <td>
+                            {% if grade.letter_grade == 'A' %}
+                                <span class="status-pill" style="background:#10b981;color:white;">{{ grade.letter_grade }}</span>
+                            {% elif grade.letter_grade == 'B' %}
+                                <span class="status-pill" style="background:#6366f1;color:white;">{{ grade.letter_grade }}</span>
+                            {% elif grade.letter_grade == 'C' %}
+                                <span class="status-pill" style="background:#f59e0b;color:white;">{{ grade.letter_grade }}</span>
+                            {% else %}
+                                <span class="status-pill" style="background:#ef4444;color:white;">{{ grade.letter_grade }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ grade.entered_by.get_full_name|default:grade.entered_by }}</td>
+                        {% if can_manage_grades %}
+                            <td>
+                                <div class="table-actions">
+                                    <a class="btn btn-neutral btn-small" href="{% url 'academics:grade_update' grade.pk %}">Edit</a>
+                                    <form method="post" action="{% url 'academics:grade_delete' grade.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{% if can_manage_grades %}8{% else %}7{% endif %}">No grades recorded yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

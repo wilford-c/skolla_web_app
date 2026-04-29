@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Skola{% endblock %}
+
+{% block page_title %}Messages{% endblock %}
+
+{% block content %}
+<div class="messaging-container">
+    <div class="messaging-header">
+        <h1>Inbox</h1>
+        <a href="{% url 'messaging:new' %}" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+            </svg>
+            New Message
+        </a>
+    </div>
+    
+    {% if conversations %}
+        <div class="conversations-list">
+            {% for conversation in conversations %}
+                <a href="{% url 'messaging:conversation' conversation.pk %}" class="conversation-card {% if conversation.unread_count > 0 %}unread{% endif %}">
+                    <div class="conversation-avatar">
+                        {% if conversation.other_user %}
+                            <div class="avatar-circle">
+                                {{ conversation.other_user.first_name|first }}{{ conversation.other_user.last_name|first }}
+                            </div>
+                        {% else %}
+                            <div class="avatar-circle group">
+                                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                    <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                                    <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                                </svg>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="conversation-content">
+                        <div class="conversation-header-row">
+                            <h3 class="conversation-subject">
+                                {{ conversation.subject }}
+                                {% if conversation.unread_count > 0 %}
+                                    <span class="unread-badge">{{ conversation.unread_count }}</span>
+                                {% endif %}
+                            </h3>
+                            <span class="conversation-time">{{ conversation.updated_at|timesince }} ago</span>
+                        </div>
+                        
+                        <div class="conversation-participants">
+                            {% if conversation.other_user %}
+                                <span class="participant-name">{{ conversation.other_user.display_name }}</span>
+                                <span class="participant-role">({{ conversation.other_user.get_role_display }})</span>
+                            {% else %}
+                                <span class="participant-count">{{ conversation.participants.count }} participants</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if conversation.last_message %}
+                            <p class="last-message">
+                                <strong>{{ conversation.last_message.sender.display_name }}:</strong>
+                                {{ conversation.last_message.content|truncatewords:15 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="conversation-chevron">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor" opacity="0.3">
+                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2zm5 4a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+            </svg>
+            <h3>No Messages</h3>
+            <p>You don't have any conversations yet.</p>
+            <a href="{% url 'messaging:new' %}" class="btn btn-primary">Start a Conversation</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.messaging-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.messaging-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.messaging-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.conversations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.conversation-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    text-decoration: none;
+    color: inherit;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+}
+
+.conversation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+    border-left-color: var(--primary);
+}
+
+.conversation-card.unread {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border-left-color: var(--primary);
+}
+
+.conversation-avatar {
+    flex-shrink: 0;
+}
+
+.avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.avatar-circle.group {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+.conversation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.conversation-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.375rem;
+}
+
+.conversation-subject {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 0.375rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.conversation-time {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.conversation-participants {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.participant-name {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.participant-role,
+.participant-count {
+    color: var(--text-muted);
+}
+
+.last-message {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.last-message strong {
+    color: var(--text-primary);
+}
+
+.conversation-chevron {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+}
+
+.empty-state svg {
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    margin: 0 0 1.5rem;
+    color: var(--text-muted);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

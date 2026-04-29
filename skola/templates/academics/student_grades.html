@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ student.full_name }} Grades · Skola{% endblock %}
+{% block page_title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+
+<!-- Student Header -->
+<section class="panel" style="margin-bottom:2rem;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;">
+    <div style="padding:1.5rem;">
+        <p style="margin:0;opacity:0.9;font-size:0.875rem;">Academic Performance</p>
+        <h2 style="margin:0.25rem 0 0.5rem;font-size:2rem;font-weight:700;">{{ student.full_name }}</h2>
+        <p style="margin:0;opacity:0.9;">Admission #{{ student.admission_number }}</p>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:1rem;padding:0 1.5rem 1.5rem;">
+        <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+            <p style="margin:0;font-size:0.875rem;opacity:0.9;">Overall Average</p>
+            <p style="margin:0.25rem 0 0;font-size:2.5rem;font-weight:700;">{{ overall_average|floatformat:1 }}%</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+            <p style="margin:0;font-size:0.875rem;opacity:0.9;">Total Grades</p>
+            <p style="margin:0.25rem 0 0;font-size:2.5rem;font-weight:700;">{{ total_grades }}</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+            <p style="margin:0;font-size:0.875rem;opacity:0.9;">Subjects</p>
+            <p style="margin:0.25rem 0 0;font-size:2.5rem;font-weight:700;">{{ subject_stats|length }}</p>
+        </div>
+    </div>
+</section>
+
+<!-- Subject Breakdown -->
+{% if subject_stats %}
+    {% for stat in subject_stats %}
+    <section class="panel" style="margin-bottom:2rem;">
+        <div class="panel-header">
+            <div>
+                <h3 class="panel-title">{{ stat.subject.name }}</h3>
+                <p style="margin:0.25rem 0 0;color:#6b7280;font-size:0.875rem;">
+                    {{ stat.subject.classroom }} · {{ stat.grade_count }} assessment(s)
+                </p>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:2rem;font-weight:700;margin-bottom:0.25rem;">{{ stat.weighted_average }}%</div>
+                <div>
+                    {% if stat.letter_grade == 'A' %}
+                        <span class="status-pill" style="background:#10b981;color:white;font-size:1.25rem;padding:0.5rem 1rem;">{{ stat.letter_grade }}</span>
+                    {% elif stat.letter_grade == 'B' %}
+                        <span class="status-pill" style="background:#6366f1;color:white;font-size:1.25rem;padding:0.5rem 1rem;">{{ stat.letter_grade }}</span>
+                    {% elif stat.letter_grade == 'C' %}
+                        <span class="status-pill" style="background:#f59e0b;color:white;font-size:1.25rem;padding:0.5rem 1rem;">{{ stat.letter_grade }}</span>
+                    {% else %}
+                        <span class="status-pill" style="background:#ef4444;color:white;font-size:1.25rem;padding:0.5rem 1rem;">{{ stat.letter_grade }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Weight</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in stat.grades %}
+                    <tr>
+                        <td><strong>{{ grade.assessment.name }}</strong></td>
+                        <td><span class="status-pill status-present">{{ grade.assessment.get_assessment_type_display }}</span></td>
+                        <td>{{ grade.assessment.date }}</td>
+                        <td><strong>{{ grade.score }}/{{ grade.assessment.max_score }}</strong></td>
+                        <td>{{ grade.percentage|floatformat:1 }}%</td>
+                        <td>{{ grade.assessment.weight }}%</td>
+                        <td>{{ grade.remarks|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endfor %}
+{% else %}
+    <section class="panel">
+        <p>No grades recorded yet for this student.</p>
+    </section>
+{% endif %}
+
+<div style="margin-top:2rem;">
+    <a class="btn btn-ghost" href="{% url 'academics:grades' %}">← Back to All Grades</a>
+</div>
+
+{% endblock %}

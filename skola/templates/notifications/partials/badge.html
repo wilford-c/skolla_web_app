@@ -1,0 +1,5 @@
+{% if count > 0 %}
+<span class="notification-badge" id="notificationBadge" style="display: flex;" data-count="{{ count|default:'0' }}">{{ count|default:"0" }}</span>
+{% else %}
+<span class="notification-badge" id="notificationBadge" style="display: none;" data-count="0">0</span>
+{% endif %}

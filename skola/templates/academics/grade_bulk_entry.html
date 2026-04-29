@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Bulk Grade Entry · Skola{% endblock %}
+{% block page_title %}Bulk Grade Entry{% endblock %}
+{% block content %}
+<section class="form-layout">
+    <p class="page-label">Performance Tracking</p>
+    
+    {% if not show_entry_form %}
+    <!-- Step 1: Select Assessment -->
+    <div class="form-card">
+        <h3 style="margin-top:0;">Select Assessment</h3>
+        <p style="margin-bottom:1.5rem;">Choose an assessment to enter grades for all students.</p>
+        
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            
+            <div class="field-block">
+                <label for="{{ form.assessment.id_for_label }}">{{ form.assessment.label }}</label>
+                {{ form.assessment }}
+                {% if form.assessment.help_text %}
+                    <p class="field-help">{{ form.assessment.help_text }}</p>
+                {% endif %}
+                {% if form.assessment.errors %}
+                    <div class="field-errors">{{ form.assessment.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit" name="select_assessment">Continue</button>
+                <a class="btn btn-ghost" href="{% url 'academics:grades' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <!-- Step 2: Enter Grades for All Students -->
+    <div class="form-card">
+        <div style="margin-bottom:1.5rem;">
+            <h3 style="margin:0;">{{ assessment.name }}</h3>
+            <p style="margin:0.25rem 0 0;color:#6b7280;">
+                {{ assessment.subject.name }} · {{ assessment.get_assessment_type_display }} · Max Score: {{ assessment.max_score }}
+            </p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="assessment_id" value="{{ assessment.id }}">
+            
+            <div class="table-scroll" style="margin-bottom:1.5rem;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Admission #</th>
+                            <th>Student Name</th>
+                            <th>Score (out of {{ assessment.max_score }})</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student_data in students_data %}
+                        <tr>
+                            <td>{{ student_data.student.admission_number }}</td>
+                            <td>{{ student_data.student.full_name }}</td>
+                            <td>
+                                <input 
+                                    type="number" 
+                                    name="score_{{ student_data.student.id }}" 
+                                    step="0.01" 
+                                    min="0" 
+                                    max="{{ assessment.max_score }}"
+                                    value="{{ student_data.existing_score|default:'' }}"
+                                    style="width:100%;max-width:120px;"
+                                    placeholder="0.00"
+                                >
+                            </td>
+                            <td>
+                                <input 
+                                    type="text" 
+                                    name="remarks_{{ student_data.student.id }}" 
+                                    value="{{ student_data.existing_remarks|default:'' }}"
+                                    style="width:100%;"
+                                    placeholder="Optional comments"
+                                >
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4">No students found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit" name="save_grades">Save All Grades</button>
+                <a class="btn btn-ghost" href="{% url 'academics:grades' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

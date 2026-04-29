@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Announcement - Skola{% endblock %}
+
+{% block page_title %}Delete Announcement{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="back-link-wrapper">
+        <a href="{% url 'announcements:detail' announcement.pk %}" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Announcement
+        </a>
+    </div>
+    
+    <div class="delete-card">
+        <div class="delete-icon">
+            <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+        </div>
+        
+        <h1>Delete Announcement?</h1>
+        <p class="warning-text">
+            Are you sure you want to delete this announcement? This action cannot be undone.
+        </p>
+        
+        <div class="announcement-preview">
+            <h3>{{ announcement.title }}</h3>
+            <div class="preview-meta">
+                <span class="priority-badge priority-{{ announcement.priority|lower }}">
+                    {{ announcement.get_priority_display }}
+                </span>
+                <span class="audience-badge">
+                    {{ announcement.get_audience_display }}
+                </span>
+                {% if announcement.pinned %}
+                    <span class="pinned-badge">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
+                        </svg>
+                        Pinned
+                    </span>
+                {% endif %}
+            </div>
+            <p class="preview-excerpt">{{ announcement.content|truncatewords:30 }}</p>
+            <div class="preview-info">
+                <span>Created: {{ announcement.created_at|date:"M d, Y" }}</span>
+                <span>Views: {{ announcement.views.count }}</span>
+                {% if announcement.attachments.exists %}
+                    <span>Attachments: {{ announcement.attachments.count }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form method="post" class="delete-form">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <a href="{% url 'announcements:detail' announcement.pk %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                    Yes, Delete Announcement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.delete-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.back-link-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+.delete-card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.delete-icon {
+    margin: 0 auto 1.5rem;
+    color: var(--danger);
+    opacity: 0.8;
+}
+
+.delete-card h1 {
+    margin: 0 0 1rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.warning-text {
+    margin: 0 0 2rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.announcement-preview {
+    background: var(--bg-body);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+    border: 1px solid var(--border);
+}
+
+.announcement-preview h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.priority-badge,
+.audience-badge,
+.pinned-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.priority-low {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.priority-normal {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.priority-high {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.priority-urgent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.audience-badge {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.pinned-badge {
+    background: #ffedd5;
+    color: #9a3412;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.preview-excerpt {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.preview-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.delete-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

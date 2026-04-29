@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Reports · Skola{% endblock %}
+{% block page_title %}Attendance Reports & Analytics{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Analytics</p>
+            <h2 class="panel-title">Attendance Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a class="btn btn-neutral" href="{% url 'attendance:export_csv' %}?{{ request.GET.urlencode }}" target="_blank">
+                Export CSV
+            </a>
+            <a class="btn btn-neutral" href="{% url 'attendance:export_pdf' %}?{{ request.GET.urlencode }}" target="_blank">
+                Export PDF
+            </a>
+            <a class="btn btn-primary" href="{% url 'attendance:list' %}">View Records</a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="filter-form" style="background: #f8fafc; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="field-block">
+                <label for="date_from">Date From</label>
+                <input type="date" id="date_from" name="date_from" value="{{ date_from }}" style="width: 100%;">
+            </div>
+            
+            <div class="field-block">
+                <label for="date_to">Date To</label>
+                <input type="date" id="date_to" name="date_to" value="{{ date_to }}" style="width: 100%;">
+            </div>
+            
+            <div class="field-block">
+                <label for="classroom">Classroom</label>
+                <select id="classroom" name="classroom" style="width: 100%;">
+                    <option value="">All Classrooms</option>
+                    {% for classroom in classrooms %}
+                        <option value="{{ classroom.id }}" {% if selected_classroom|stringformat:"s" == classroom.id|stringformat:"s" %}selected{% endif %}>
+                            {{ classroom.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="field-block">
+                <label for="subject">Subject</label>
+                <select id="subject" name="subject" style="width: 100%;">
+                    <option value="">All Subjects</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject|stringformat:"s" == subject.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="field-block">
+                <label for="student">Student</label>
+                <select id="student" name="student" style="width: 100%;">
+                    <option value="">All Students</option>
+                    {% for student in students %}
+                        <option value="{{ student.id }}" {% if selected_student|stringformat:"s" == student.id|stringformat:"s" %}selected{% endif %}>
+                            {{ student.full_name }} ({{ student.admission_number }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="field-block">
+                <label for="status">Status</label>
+                <select id="status" name="status" style="width: 100%;">
+                    <option value="">All Statuses</option>
+                    {% for key, label in statuses %}
+                        <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+            <a href="{% url 'attendance:reports' %}" class="btn btn-ghost">Clear Filters</a>
+        </div>
+    </form>
+
+    <!-- Statistics Summary -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: #10b981; color: white; padding: 1.5rem; border-radius: 0.5rem;">
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Present</div>
+            <div style="font-size: 2rem; font-weight: 700;">{{ present_count }}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">{{ present_pct }}% of total</div>
+        </div>
+        
+        <div style="background: #ef4444; color: white; padding: 1.5rem; border-radius: 0.5rem;">
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Absent</div>
+            <div style="font-size: 2rem; font-weight: 700;">{{ absent_count }}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">{{ absent_pct }}% of total</div>
+        </div>
+        
+        <div style="background: #f59e0b; color: white; padding: 1.5rem; border-radius: 0.5rem;">
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Late</div>
+            <div style="font-size: 2rem; font-weight: 700;">{{ late_count }}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">{{ late_pct }}% of total</div>
+        </div>
+        
+        <div style="background: #6366f1; color: white; padding: 1.5rem; border-radius: 0.5rem;">
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Excused</div>
+            <div style="font-size: 2rem; font-weight: 700;">{{ excused_count }}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">{{ excused_pct }}% of total</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <!-- Daily Trend Chart -->
+        <div style="background: white; padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+            <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.125rem;">Daily Attendance Trends</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+        
+        <!-- Status Distribution Chart -->
+        <div style="background: white; padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+            <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.125rem;">Status Distribution</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Students with Most Absences -->
+    {% if absent_students %}
+    <div style="background: white; padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 2rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.125rem;">Students with Most Absences/Late</h3>
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Admission #</th>
+                        <th>Student Name</th>
+                        <th>Absence Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in absent_students %}
+                        <tr>
+                            <td>{{ student.student__admission_number }}</td>
+                            <td>{{ student.student__first_name }} {{ student.student__last_name }}</td>
+                            <td><span class="status-pill status-absent">{{ student.absence_count }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Records -->
+    <div style="background: white; padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.125rem;">Recent Records (Latest 100)</h3>
+        <p style="margin-bottom: 1rem; color: #6b7280; font-size: 0.875rem;">
+            Showing {{ records|length }} of {{ total_records }} total records
+        </p>
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.student.full_name }}</td>
+                            <td>{{ record.classroom.name }}</td>
+                            <td>{{ record.subject.name|default:"-" }}</td>
+                            <td>
+                                {% if record.status == record.Status.PRESENT %}
+                                    <span class="status-pill status-present">{{ record.get_status_display }}</span>
+                                {% elif record.status == record.Status.ABSENT %}
+                                    <span class="status-pill status-absent">{{ record.get_status_display }}</span>
+                                {% elif record.status == record.Status.LATE %}
+                                    <span class="status-pill status-late">{{ record.get_status_display }}</span>
+                                {% else %}
+                                    <span class="status-pill status-excused">{{ record.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">No records found for the selected filters.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script>
+// Daily Trend Chart
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+const trendChart = new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [
+            {
+                label: 'Present',
+                data: {{ chart_data.present|safe }},
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Absent',
+                data: {{ chart_data.absent|safe }},
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Late',
+                data: {{ chart_data.late|safe }},
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Excused',
+                data: {{ chart_data.excused|safe }},
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Pie Chart
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+const pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Present', 'Absent', 'Late', 'Excused'],
+        datasets: [{
+            data: [{{ present_count }}, {{ absent_count }}, {{ late_count }}, {{ excused_count }}],
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

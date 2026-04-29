@@ -1,0 +1,664 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Announcement - Skola{% endblock %}
+
+{% block page_title %}{{ action }} Announcement{% endblock %}
+
+{% block content %}
+<div class="announcement-form-container">
+    <div class="back-link-wrapper">
+        <a href="{% url 'announcements:list' %}" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Announcements
+        </a>
+    </div>
+    
+    <div class="announcement-form-card">
+        <div class="form-header">
+            <h1>{{ action }} Announcement</h1>
+            <p class="header-description">
+                {% if action == "Create" %}
+                    Create a new announcement to share with students, teachers, or guardians.
+                {% else %}
+                    Update the announcement details below.
+                {% endif %}
+            </p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="announcement-form" id="announcementForm">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2 class="section-title">Basic Information</h2>
+                
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}" class="required">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                        </svg>
+                        Title
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="field-error">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.content.id_for_label }}" class="required">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/>
+                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                        </svg>
+                        Content
+                    </label>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                        <div class="field-error">{{ form.content.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="section-title">Settings</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.priority.id_for_label }}">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                            Priority
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                            <div class="field-error">{{ form.priority.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.audience.id_for_label }}">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                            </svg>
+                            Audience
+                        </label>
+                        {{ form.audience }}
+                        {% if form.audience.errors %}
+                            <div class="field-error">{{ form.audience.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.target_classrooms.id_for_label }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        Target Classrooms (optional)
+                    </label>
+                    {{ form.target_classrooms }}
+                    <div class="field-help">{{ form.target_classrooms.help_text }}</div>
+                    {% if form.target_classrooms.errors %}
+                        <div class="field-error">{{ form.target_classrooms.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.expires_at.id_for_label }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                        </svg>
+                        Expires At (optional)
+                    </label>
+                    {{ form.expires_at }}
+                    <div class="field-help">{{ form.expires_at.help_text }}</div>
+                    {% if form.expires_at.errors %}
+                        <div class="field-error">{{ form.expires_at.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.pinned }}
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
+                                </svg>
+                                Pin to top
+                            </span>
+                        </label>
+                        <div class="field-help">{{ form.pinned.help_text }}</div>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.published }}
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                                </svg>
+                                Publish immediately
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="section-title">Attachments</h2>
+                
+                {% if announcement and announcement.attachments.exists %}
+                <div class="existing-attachments">
+                    <strong>Current Attachments:</strong>
+                    <div class="attachments-list">
+                        {% for attachment in announcement.attachments.all %}
+                        <div class="attachment-item">
+                            <div class="attachment-info">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1z"/>
+                                </svg>
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                            </div>
+                            <label class="delete-checkbox">
+                                <input type="checkbox" name="delete_attachment" value="{{ attachment.id }}">
+                                <span>Delete</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="id_attachments">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/>
+                        </svg>
+                        Add New Attachments (optional)
+                    </label>
+                    <div class="file-upload-zone" id="fileUploadZone">
+                        <svg width="48" height="48" viewBox="0 0 16 16" fill="currentColor" opacity="0.4">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                        </svg>
+                        <div class="upload-text">
+                            <strong>Click to upload</strong> or drag and drop
+                            <span>PDF, DOC, DOCX, images (Max 10MB per file)</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            id="id_attachments" 
+                            name="attachments" 
+                            multiple 
+                            class="file-input"
+                            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                        >
+                    </div>
+                    <div id="filesPreview" class="files-preview"></div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'announcements:list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                    </svg>
+                    {{ action }} Announcement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.announcement-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-link-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+.announcement-form-card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+}
+
+.form-header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-header h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.header-description {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.announcement-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section {
+    padding: 1.5rem;
+    background: var(--bg-body);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.section-title {
+    margin: 0 0 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 1.125rem;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.required::after {
+    content: "*";
+    color: var(--danger);
+    margin-left: 0.25rem;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-textarea {
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.checkbox-group {
+    margin-bottom: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.field-help {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.field-error {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.existing-attachments {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.existing-attachments strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.attachment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem;
+    background: var(--bg-body);
+    border-radius: 6px;
+}
+
+.attachment-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attachment-info a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.attachment-info a:hover {
+    text-decoration: underline;
+}
+
+.delete-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--danger);
+    cursor: pointer;
+}
+
+.delete-checkbox input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.file-upload-zone {
+    position: relative;
+    padding: 3rem 2rem;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.file-upload-zone:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.upload-text strong {
+    color: var(--text-primary);
+}
+
+.upload-text span {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.files-preview {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.remove-file-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.remove-file-btn:hover {
+    background: #fee2e2;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_attachments');
+    const filesPreview = document.getElementById('filesPreview');
+    const fileUploadZone = document.getElementById('fileUploadZone');
+    let selectedFiles = [];
+    
+    // File selection
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+    });
+    
+    // Drag and drop
+    fileUploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        fileUploadZone.style.borderColor = 'var(--primary)';
+        fileUploadZone.style.background = 'rgba(37, 99, 235, 0.05)';
+    });
+    
+    fileUploadZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        fileUploadZone.style.borderColor = 'var(--border)';
+        fileUploadZone.style.background = 'white';
+    });
+    
+    fileUploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        fileUploadZone.style.borderColor = 'var(--border)';
+        fileUploadZone.style.background = 'white';
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    function handleFiles(files) {
+        selectedFiles = Array.from(files);
+        displayFiles();
+    }
+    
+    function displayFiles() {
+        filesPreview.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-preview-item';
+            
+            fileItem.innerHTML = `
+                <div class="file-preview-info">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1z"/>
+                    </svg>
+                    <span>${file.name}</span>
+                </div>
+                <button type="button" class="remove-file-btn" data-index="${index}">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                    </svg>
+                </button>
+            `;
+            
+            filesPreview.appendChild(fileItem);
+        });
+        
+        // Add remove handlers
+        document.querySelectorAll('.remove-file-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                selectedFiles.splice(index, 1);
+                displayFiles();
+                updateFileInput();
+            });
+        });
+    }
+    
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    }
+});
+</script>
+{% endblock %}

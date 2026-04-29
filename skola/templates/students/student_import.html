@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Import Students · Skola{% endblock %}
+{% block page_title %}Bulk Import Students{% endblock %}
+{% block content %}
+<section class="form-layout">
+    <p class="page-label">Enrollment</p>
+    
+    {% if not preview %}
+    <div class="form-card">
+        <h3>Upload CSV File</h3>
+        <p style="margin-bottom: 1.5rem;">Import multiple students at once using a CSV file.</p>
+        
+        <div class="info-box" style="margin-bottom: 1.5rem; padding: 1rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 0.375rem;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 600;">CSV Format Requirements</h4>
+            <p style="margin: 0; font-size: 0.875rem;">Your CSV file must include these columns:</p>
+            <ul style="margin: 0.5rem 0 0 1.5rem; font-size: 0.875rem;">
+                <li><strong>admission_number</strong> - Unique student ID</li>
+                <li><strong>first_name</strong> - Student's first name</li>
+                <li><strong>last_name</strong> - Student's last name</li>
+                <li><strong>date_of_birth</strong> - Format: YYYY-MM-DD (e.g., 2010-05-15)</li>
+                <li><strong>guardian_name</strong> - Parent/guardian full name</li>
+            </ul>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Optional columns: current_classroom_code, contact_email, contact_phone, status (ACTIVE/INACTIVE/GRADUATED)</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="form-stack">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            
+            {% for field in form %}
+                <div class="field-block">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="field-help">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="field-errors">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit" name="preview">Preview Import</button>
+                <a class="btn btn-ghost" href="{% url 'students:list' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+    
+    {% if preview %}
+    <div class="form-card">
+        <h3>Import Preview</h3>
+        
+        {% if errors %}
+        <div class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 1rem; background: #fee; border: 1px solid #fcc; border-radius: 0.375rem;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-weight: 600;">Found {{ errors|length }} Error(s)</h4>
+            <ul style="margin: 0; padding-left: 1.5rem;">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        {% if valid_students %}
+        <div class="info-box" style="margin-bottom: 1.5rem; padding: 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.375rem;">
+            <p style="margin: 0; font-weight: 600;">Ready to import {{ valid_students|length }} student(s) from {{ total_rows }} total row(s)</p>
+        </div>
+        
+        <div class="table-scroll" style="margin-bottom: 1.5rem;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Admission #</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>DOB</th>
+                        <th>Guardian</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in valid_students %}
+                        <tr>
+                            <td>{{ student.admission_number }}</td>
+                            <td>{{ student.first_name }}</td>
+                            <td>{{ student.last_name }}</td>
+                            <td>{{ student.date_of_birth }}</td>
+                            <td>{{ student.guardian_name }}</td>
+                            <td>
+                                <span class="status-pill status-active">{{ student.status }}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if not errors %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit" name="confirm">Confirm & Import</button>
+                <button class="btn btn-ghost" type="submit" name="cancel">Cancel</button>
+            </div>
+        </form>
+        {% else %}
+        <div class="form-actions">
+            <a class="btn btn-primary" href="{% url 'students:import' %}">Try Again</a>
+            <a class="btn btn-ghost" href="{% url 'students:list' %}">Cancel</a>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+    
+</section>
+{% endblock %}

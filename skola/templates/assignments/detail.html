@@ -1,0 +1,744 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assignment.title }} - Skola{% endblock %}
+
+{% block page_title %}Assignment Details{% endblock %}
+
+{% block content %}
+<div class="assignment-detail-container">
+    <div class="back-link-wrapper">
+        <a href="{% url 'assignments:list' %}" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Assignments
+        </a>
+    </div>
+    
+    <div class="assignment-detail-card">
+        <div class="assignment-detail-header">
+            <div>
+                <h1 class="assignment-detail-title">{{ assignment.title }}</h1>
+                <div class="assignment-badges">
+                    <span class="subject-badge">{{ assignment.subject.name }}</span>
+                    <span class="classroom-badge">{{ assignment.classroom.name }}</span>
+                    <span class="status-badge status-{{ assignment.status|lower }}">
+                        {{ assignment.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                {% if request.user.role == 'STUDENT' and assignment.status == 'PUBLISHED' %}
+                    <a href="{% url 'assignments:submit' assignment.pk %}" class="btn btn-primary">Submit Assignment</a>
+                {% endif %}
+                
+                {% if request.user.role in 'ADMIN,STAFF' or request.user == assignment.teacher %}
+                    <div class="action-buttons">
+                        <a href="{% url 'assignments:edit' assignment.pk %}" class="btn btn-secondary">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                            </svg>
+                            Edit
+                        </a>
+                        <a href="{% url 'assignments:delete' assignment.pk %}" class="btn btn-danger">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                            </svg>
+                            Delete
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="assignment-meta-grid">
+            <div class="meta-card">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                </svg>
+                <div>
+                    <div class="meta-label">Teacher</div>
+                    <div class="meta-value">{{ assignment.teacher.display_name }}</div>
+                </div>
+            </div>
+            
+            <div class="meta-card">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                </svg>
+                <div>
+                    <div class="meta-label">Assigned</div>
+                    <div class="meta-value">{{ assignment.assigned_date|date:"M d, Y" }}</div>
+                </div>
+            </div>
+            
+            <div class="meta-card {% if assignment.is_overdue %}overdue{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                </svg>
+                <div>
+                    <div class="meta-label">Due Date</div>
+                    <div class="meta-value">
+                        {{ assignment.due_date|date:"M d, Y g:i A" }}
+                        {% if assignment.is_overdue %}
+                            <span class="overdue-badge">Overdue</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="meta-card">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                </svg>
+                <div>
+                    <div class="meta-label">Max Marks</div>
+                    <div class="meta-value">{{ assignment.max_marks }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="assignment-description">
+            <h2>Description</h2>
+            <div class="description-content">{{ assignment.description|linebreaks }}</div>
+        </div>
+        
+        {% if attachments %}
+        <div class="attachments-section">
+            <h2>Attachments</h2>
+            <ul class="attachments-list">
+                {% for attachment in attachments %}
+                <li class="attachment-item">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1z"/>
+                    </svg>
+                    <a href="{{ attachment.file.url }}" download="{{ attachment.file_name }}">
+                        {{ attachment.file_name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if request.user.role in 'TEACHER,STAFF,ADMIN' %}
+    <div class="submissions-section">
+        <h2>Submissions ({{ submissions.count }})</h2>
+        
+        {% if submissions %}
+        <div class="submissions-list">
+            {% for submission in submissions %}
+            <div class="submission-card">
+                <div class="submission-header">
+                    <div class="student-info">
+                        <h3>{{ submission.student.display_name }}</h3>
+                        <span class="submission-time">Submitted: {{ submission.submitted_at|date:"M d, Y g:i A" }}</span>
+                        {% if submission.is_late %}
+                            <span class="late-badge">Late Submission</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="marks-display">
+                        {% if submission.marks_obtained is not None %}
+                            <span class="marks-obtained">{{ submission.marks_obtained }}</span>
+                            <span class="marks-separator">/</span>
+                            <span class="marks-total">{{ assignment.max_marks }}</span>
+                            <span class="percentage">({{ submission.percentage|floatformat:0 }}%)</span>
+                        {% else %}
+                            <span class="not-graded">Not Graded</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if submission.content %}
+                <div class="submission-content">
+                    <strong>Content:</strong>
+                    <p>{{ submission.content|truncatewords:30 }}</p>
+                </div>
+                {% endif %}
+                
+                {% if submission.files.exists %}
+                <div class="submission-files">
+                    <strong>Files:</strong>
+                    <ul class="file-list">
+                        {% for file in submission.files.all %}
+                        <li>
+                            <a href="{{ file.file.url }}" download="{{ file.file_name }}">
+                                {{ file.file_name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if submission.feedback %}
+                <div class="submission-feedback">
+                    <strong>Feedback:</strong>
+                    <p>{{ submission.feedback }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-submissions">
+            <svg width="48" height="48" viewBox="0 0 16 16" fill="currentColor" opacity="0.3">
+                <path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/>
+                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+            </svg>
+            <p>No submissions yet</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if request.user.role == 'STUDENT' %}
+    <div class="my-submission-section">
+        <h2>My Submission</h2>
+        
+        {% if my_submission %}
+        <div class="my-submission-card">
+            <div class="submission-status">
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                <span>Submitted on {{ my_submission.submitted_at|date:"M d, Y g:i A" }}</span>
+                {% if my_submission.is_late %}
+                    <span class="late-badge">Late Submission</span>
+                {% endif %}
+            </div>
+            
+            {% if my_submission.marks_obtained is not None %}
+            <div class="my-marks">
+                <div class="marks-label">Your Score</div>
+                <div class="marks-display-large">
+                    <span class="score">{{ my_submission.marks_obtained }}</span>
+                    <span class="separator">/</span>
+                    <span class="total">{{ assignment.max_marks }}</span>
+                </div>
+                <div class="percentage-large">{{ my_submission.percentage|floatformat:1 }}%</div>
+            </div>
+            {% else %}
+            <div class="grading-pending">
+                <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" opacity="0.5">
+                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                </svg>
+                <p>Grading pending</p>
+            </div>
+            {% endif %}
+            
+            {% if my_submission.feedback %}
+            <div class="teacher-feedback">
+                <h3>Teacher Feedback</h3>
+                <p>{{ my_submission.feedback }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="no-submission">
+            <svg width="48" height="48" viewBox="0 0 16 16" fill="currentColor" opacity="0.3">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            <p>You haven't submitted this assignment yet</p>
+            {% if assignment.status == 'PUBLISHED' %}
+                <a href="{% url 'assignments:submit' assignment.pk %}" class="btn btn-primary">Submit Now</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.assignment-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.back-link-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+.assignment-detail-card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.assignment-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.assignment-detail-title {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.assignment-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.subject-badge,
+.classroom-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.subject-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.classroom-badge {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-draft {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.status-published {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-closed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.assignment-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.meta-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-body);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.meta-card.overdue {
+    background: #fef2f2;
+    border-color: var(--danger);
+}
+
+.meta-card svg {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.meta-card.overdue svg {
+    color: var(--danger);
+}
+
+.meta-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.meta-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.overdue-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--danger);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.assignment-description {
+    margin-bottom: 2rem;
+}
+
+.assignment-description h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.description-content {
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.attachments-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.attachments-section h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.attachments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attachment-item a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.attachment-item a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.submissions-section,
+.my-submission-section {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.submissions-section h2,
+.my-submission-section h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.submission-card {
+    padding: 1.5rem;
+    background: var(--bg-body);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.student-info h3 {
+    margin: 0 0 0.375rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.submission-time {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.late-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.marks-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.marks-obtained {
+    color: var(--primary);
+}
+
+.marks-separator {
+    color: var(--text-muted);
+}
+
+.marks-total {
+    color: var(--text-primary);
+}
+
+.percentage {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-left: 0.25rem;
+}
+
+.not-graded {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.submission-content,
+.submission-files,
+.submission-feedback {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.submission-content p,
+.submission-feedback p {
+    margin: 0.5rem 0 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.file-list a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.file-list a:hover {
+    text-decoration: underline;
+}
+
+.no-submissions,
+.no-submission {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-muted);
+}
+
+.no-submissions svg,
+.no-submission svg,
+.grading-pending svg {
+    margin-bottom: 1rem;
+}
+
+.my-submission-card {
+    padding: 2rem;
+    background: var(--bg-body);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.submission-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.submission-status svg {
+    color: var(--success);
+}
+
+.my-marks {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #dbeafe, #f0f9ff);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.marks-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.marks-display-large {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.marks-display-large .separator {
+    color: var(--text-muted);
+    margin: 0 0.5rem;
+}
+
+.marks-display-large .total {
+    color: var(--text-primary);
+}
+
+.percentage-large {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.grading-pending {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-muted);
+}
+
+.teacher-feedback {
+    padding: 1.5rem;
+    background: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    border-radius: 8px;
+}
+
+.teacher-feedback h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.teacher-feedback p {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

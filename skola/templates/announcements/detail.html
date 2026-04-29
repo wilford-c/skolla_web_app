@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}{{ announcement.title }} - Skola{% endblock %}
+
+{% block page_title %}Announcement{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'announcements:list' %}" class="btn btn-secondary">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+    </svg>
+    Back to List
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="announcement-detail-container">
+    {% if request.user.role in 'ADMIN,STAFF' %}
+    <div class="admin-actions">
+        <a href="{% url 'announcements:edit' announcement.pk %}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+            </svg>
+            Edit
+        </a>
+        <a href="{% url 'announcements:delete' announcement.pk %}" class="btn btn-danger">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+            Delete
+        </a>
+    </div>
+    {% endif %}
+    
+    <article class="announcement-detail-card">
+        <header class="announcement-detail-header">
+            <div class="header-badges">
+                {% if announcement.pinned %}
+                    <span class="badge badge-warning">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-.42.195-.614 0-.195-.195-.195-.419 0-.614l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z"/>
+                        </svg>
+                        Pinned
+                    </span>
+                {% endif %}
+                <span class="badge badge-{{ announcement.priority|lower }}">
+                    {{ announcement.get_priority_display }}
+                </span>
+                <span class="badge badge-neutral">
+                    {{ announcement.get_audience_display }}
+                </span>
+            </div>
+            
+            <h1 class="announcement-detail-title">{{ announcement.title }}</h1>
+            
+            <div class="announcement-detail-meta">
+                <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                    </svg>
+                    <span>Posted by <strong>{{ announcement.author.display_name }}</strong></span>
+                </div>
+                <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                    </svg>
+                    <time>{{ announcement.created_at|date:"F d, Y \a\t g:i A" }}</time>
+                </div>
+            </div>
+        </header>
+        
+        <div class="announcement-detail-content">
+            {{ announcement.content|linebreaks }}
+        </div>
+        
+        {% if announcement.attachments.exists %}
+            <div class="announcement-attachments">
+                <h3 class="attachments-title">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/>
+                    </svg>
+                    Attachments
+                </h3>
+                <ul class="attachments-list">
+                    {% for attachment in announcement.attachments.all %}
+                        <li class="attachment-item">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                            </svg>
+                            <a href="{{ attachment.file.url }}" download class="attachment-link">
+                                {{ attachment.filename }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </article>
+</div>
+
+<style>
+.announcement-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.announcement-detail-card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.announcement-detail-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.header-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-urgent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-high {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-normal {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-low {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-neutral {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.announcement-detail-title {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.announcement-detail-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.announcement-detail-content {
+    padding: 2rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.announcement-attachments {
+    padding: 2rem;
+    background: var(--bg-body);
+    border-top: 1px solid var(--border);
+}
+
+.attachments-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.attachments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attachment-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.attachment-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

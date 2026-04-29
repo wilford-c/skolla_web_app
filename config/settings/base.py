@@ -63,10 +63,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ROOT_URLCONF = "config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "config.wsgi.application"
+# https://docs.djangoproject.com/en/dev/ref/settings/#asgi-application
+ASGI_APPLICATION = "config.asgi.application"
 
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
+    "daphne",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -74,13 +77,23 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admin",
 ]
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    "channels",
+]
 
 LOCAL_APPS = [
     "accounts",
+    "api.apps.ApiConfig",
     "students",
     "academics",
-    "attendance",
+    "attendance.apps.AttendanceConfig",
+    "billing.apps.BillingConfig",
+    "auditlog.apps.AuditlogConfig",
+    "announcements",
+    "calendar_events",
+    "assignments",
+    "messaging",
+    "notifications.apps.NotificationsConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -131,7 +144,27 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "messaging.user_status.UserStatusMiddleware",
 ]
+
+# REAL-TIME / CHANNELS
+# ------------------------------------------------------------------------------
+CHANNEL_LAYER_BACKEND = env("DJANGO_CHANNEL_LAYER_BACKEND", default="inmemory")
+if CHANNEL_LAYER_BACKEND == "redis":
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [env("DJANGO_REDIS_URL", default="redis://127.0.0.1:6379/1")],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
 
 # STATIC
 # ------------------------------------------------------------------------------
@@ -233,3 +266,7 @@ LOGGING = {
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+BILLING_ECOCASH_WEBHOOK_SECRET = env(
+    "BILLING_ECOCASH_WEBHOOK_SECRET",
+    default="dev-ecocash-secret",
+)

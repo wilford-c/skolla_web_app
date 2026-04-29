@@ -1,0 +1,56 @@
+<tr id="invoice-{{ invoice.id }}">
+    <td>
+        <a href="{% url 'billing:invoice_detail' invoice.pk %}">INV-{{ invoice.id }}</a>
+        <div class="field-help" style="margin-top:0.15rem;">{{ invoice.description }}</div>
+    </td>
+    <td>
+        {{ invoice.student.full_name }}
+        <div class="field-help" style="margin-top:0.15rem;">{{ invoice.student.admission_number }}</div>
+    </td>
+    <td>{{ invoice.get_category_display }}</td>
+    <td>
+        {{ invoice.due_date }}
+        {% if invoice.is_overdue %}
+            <div><span class="status-pill status-absent">Overdue</span></div>
+        {% endif %}
+    </td>
+    <td>${{ invoice.amount_due|floatformat:2 }}</td>
+    <td>${{ invoice.amount_paid|floatformat:2 }}</td>
+    <td><strong>${{ invoice.balance_due|floatformat:2 }}</strong></td>
+    <td>
+        {% if invoice.has_pending_payment %}
+            <span class="status-pill status-late">Pending Gateway</span>
+        {% elif invoice.status == 'PAID' %}
+            <span class="status-pill status-present">Paid</span>
+        {% elif invoice.status == 'PARTIAL' %}
+            <span class="status-pill status-late">Partial</span>
+        {% elif invoice.status == 'VOID' %}
+            <span class="status-pill status-excused">Void</span>
+        {% else %}
+            <span class="status-pill status-absent">Unpaid</span>
+        {% endif %}
+    </td>
+    <td>
+        <div class="table-actions">
+            <a class="btn btn-neutral btn-small" href="{% url 'billing:invoice_detail' invoice.pk %}">View</a>
+            {% if can_manage_billing %}
+                <a class="btn btn-neutral btn-small" href="{% url 'billing:invoice_update' invoice.pk %}">Edit</a>
+            {% endif %}
+            {% if can_make_payment and invoice.status != 'PAID' and invoice.status != 'VOID' and not invoice.has_pending_payment %}
+                <form method="post"
+                      action="{% url 'billing:invoice_pay' invoice.pk %}"
+                      hx-post="{% url 'billing:invoice_pay' invoice.pk %}"
+                      hx-target="#invoice-{{ invoice.id }}"
+                      hx-swap="outerHTML">
+                    {% csrf_token %}
+                    <input type="hidden" name="amount_paid" value="{{ invoice.balance_due }}">
+                    <input type="hidden" name="method" value="ECOCASH">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button class="btn btn-primary btn-small" type="submit">Pay Balance</button>
+                </form>
+            {% elif invoice.has_pending_payment %}
+                <span class="field-help" style="margin:0;">Awaiting EcoCash callback</span>
+            {% endif %}
+        </div>
+    </td>
+</tr>

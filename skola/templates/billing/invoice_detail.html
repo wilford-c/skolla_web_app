@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Invoice INV-{{ invoice.id }} · Skola{% endblock %}
+{% block page_title %}Invoice INV-{{ invoice.id }}{% endblock %}
+{% block content %}
+<section class="panel" style="margin-bottom:1.5rem;">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Finance</p>
+            <h2 class="panel-title">{{ invoice.description }}</h2>
+        </div>
+        <div class="table-actions">
+            <a class="btn btn-neutral" href="{% url 'billing:invoice_list' %}">Back</a>
+            {% if can_manage_billing %}
+                <a class="btn btn-primary" href="{% url 'billing:invoice_update' invoice.pk %}">Edit</a>
+                {% if request.user.is_superuser or request.user.role == 'ADMIN' %}
+                    <form method="post" action="{% url 'billing:invoice_delete' invoice.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-danger" type="submit">Delete</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <article class="stat-card">
+            <p class="stat-label">Student</p>
+            <p class="stat-value" style="font-size:1.35rem;">{{ invoice.student.full_name }}</p>
+            <p class="stat-trend">{{ invoice.student.admission_number }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Amount Due</p>
+            <p class="stat-value">${{ invoice.amount_due|floatformat:2 }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Amount Paid</p>
+            <p class="stat-value">${{ invoice.amount_paid|floatformat:2 }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Balance</p>
+            <p class="stat-value">${{ invoice.balance_due|floatformat:2 }}</p>
+            {% if invoice.is_overdue %}
+                <p class="stat-trend" style="color:var(--danger);">Overdue since {{ invoice.due_date }}</p>
+            {% endif %}
+        </article>
+    </div>
+
+    <div class="responsive-stack" style="margin-top:1.5rem;">
+        <article class="panel">
+            <h3 class="panel-title">Invoice Details</h3>
+            <p><strong>Category:</strong> {{ invoice.get_category_display }}</p>
+            <p><strong>Status:</strong> {{ invoice.get_status_display }}</p>
+            <p><strong>Issued On:</strong> {{ invoice.issued_on }}</p>
+            <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
+            {% if invoice.notes %}
+                <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+            {% endif %}
+        </article>
+
+        <article class="panel">
+            <h3 class="panel-title">Record Payment</h3>
+            {% if can_pay %}
+                <form method="post" action="{% url 'billing:invoice_pay' invoice.pk %}" class="form-stack">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'billing:invoice_detail' invoice.pk %}">
+                    <div class="form-grid">
+                        {% for field in quick_payment_form %}
+                            <div class="field-block">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <p class="field-help">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="field-errors">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Record Payment</button>
+                    </div>
+                </form>
+            {% else %}
+                <p>This invoice cannot be paid from your account.</p>
+            {% endif %}
+        </article>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <h3 class="panel-title">Payment History</h3>
+    </div>
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Paid At</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Reference</th>
+                    <th>Status</th>
+                    <th>Recorded By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.paid_at|date:'Y-m-d H:i' }}</td>
+                        <td>${{ payment.amount_paid|floatformat:2 }}</td>
+                        <td>{{ payment.get_method_display }}</td>
+                        <td>{{ payment.reference|default:'-' }}</td>
+                        <td>
+                            {% if payment.status == 'SUCCESS' %}
+                                <span class="status-pill status-present">Success</span>
+                            {% elif payment.status == 'FAILED' %}
+                                <span class="status-pill status-absent">Failed</span>
+                            {% else %}
+                                <span class="status-pill status-late">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.recorded_by.display_name|default:'System' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">No payments recorded yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

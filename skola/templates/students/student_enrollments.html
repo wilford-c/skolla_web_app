@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Enrollment History · {{ student.full_name }} · Skola{% endblock %}
+{% block page_title %}Enrollment History{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Enrollment Lifecycle</p>
+            <h2 class="panel-title">{{ student.full_name }} ({{ student.admission_number }})</h2>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+            <a class="btn btn-neutral" href="{% url 'students:list' %}">Back to Students</a>
+            {% if can_transfer %}
+                <a class="btn btn-primary" href="{% url 'students:update' student.pk %}">Edit Profile</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:1rem;">
+        <article class="stat-card">
+            <p class="stat-label">Current Classroom</p>
+            <p class="stat-value">{{ student.current_classroom.code|default:'-' }}</p>
+            <p class="field-help">{{ student.current_classroom.name|default:'Not assigned' }}</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Student Status</p>
+            <p class="stat-value">{{ student.get_status_display }}</p>
+            <p class="field-help">Tracks enrollment eligibility and completion state.</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Enrollment Records</p>
+            <p class="stat-value">{{ enrollments|length }}</p>
+            <p class="field-help">Includes onboarding, transfers, and exits.</p>
+        </article>
+    </div>
+
+    {% if can_transfer %}
+        <div class="form-card" style="margin-bottom:1rem;">
+            <h3 style="margin-top:0;">Transfer / Onboard Student</h3>
+            <form method="post" action="{% url 'students:transfer' student.pk %}" class="form-stack">
+                {% csrf_token %}
+                <div class="form-grid">
+                    {% for field in transfer_form %}
+                        <div class="field-block">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <p class="field-help">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="field-errors">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">Save Transfer</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Classroom</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Onboarded By</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                    <tr>
+                        <td>{{ enrollment.classroom.code }} - {{ enrollment.classroom.name }}</td>
+                        <td>{{ enrollment.start_date }}</td>
+                        <td>{{ enrollment.end_date|default:'Present' }}</td>
+                        <td>
+                            {% if enrollment.status == enrollment.Status.ACTIVE %}
+                                <span class="status-pill status-active">{{ enrollment.get_status_display }}</span>
+                            {% elif enrollment.status == enrollment.Status.TRANSFERRED %}
+                                <span class="status-pill status-inactive">{{ enrollment.get_status_display }}</span>
+                            {% elif enrollment.status == enrollment.Status.WITHDRAWN %}
+                                <span class="status-pill status-inactive">{{ enrollment.get_status_display }}</span>
+                            {% else %}
+                                <span class="status-pill status-graduated">{{ enrollment.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ enrollment.onboarded_by.display_name|default:'System' }}</td>
+                        <td>{{ enrollment.notes|default:'-' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">No enrollment records yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordChangeForm
 
 from .models import User
 
@@ -42,3 +42,35 @@ class LoginForm(AuthenticationForm):
                 self.data = mutable_data
 
         return super().clean()
+
+
+class UserProfileForm(forms.ModelForm):
+    """Form for editing user profile information."""
+    
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Email Address'}),
+        }
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """Custom password change form with styled widgets."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].widget = forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Current Password'
+        })
+        self.fields['new_password1'].widget = forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'New Password'
+        })
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Confirm New Password'
+        })

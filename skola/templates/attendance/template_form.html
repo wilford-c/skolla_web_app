@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Template - Attendance{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-edit"></i> Edit Template</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="{{ form.name.id_for_label }}" class="form-label">Template Name</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.grouping.id_for_label }}" class="form-label">Grouping</label>
+              {{ form.grouping }}
+              {% if form.grouping.errors %}
+                <div class="text-danger">{{ form.grouping.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.sorting.id_for_label }}" class="form-label">Sorting</label>
+              {{ form.sorting }}
+              {% if form.sorting.errors %}
+                <div class="text-danger">{{ form.sorting.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3 form-check">
+              {{ form.is_shared }}
+              <label class="form-check-label" for="{{ form.is_shared.id_for_label }}">
+                Share with other users
+              </label>
+              {% if form.is_shared.errors %}
+                <div class="text-danger">{{ form.is_shared.errors }}</div>
+              {% endif %}
+            </div>
+
+            {{ form.fields }}
+            {{ form.filters }}
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+              <a href="{% url 'attendance:template_list' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

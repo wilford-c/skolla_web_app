@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Assessments · Skola{% endblock %}
+{% block page_title %}Assessments{% endblock %}
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="page-label">Grading</p>
+            <h2 class="panel-title">Assessments &amp; Tests</h2>
+        </div>
+        {% if can_create_assessments %}
+            <a class="btn btn-primary" href="{% url 'academics:assessment_create' %}">New Assessment</a>
+        {% endif %}
+    </div>
+    
+    <!-- Filters -->
+    <form method="get" class="filter-bar" style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+            <label>Subject</label>
+            <select name="subject" onchange="this.form.submit()">
+                <option value="">All Subjects</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if selected_subject|stringformat:"s" == subject.id|stringformat:"s" %}selected{% endif %}>
+                        {{ subject.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Type</label>
+            <select name="type" onchange="this.form.submit()">
+                <option value="">All Types</option>
+                {% for key, label in assessment_types %}
+                    <option value="{{ key }}" {% if selected_type == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Max Score</th>
+                    <th>Weight (%)</th>
+                    {% if can_manage_assessments %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in assessments %}
+                    <tr>
+                        <td><strong>{{ assessment.name }}</strong></td>
+                        <td>{{ assessment.subject.name }}</td>
+                        <td><span class="status-pill status-present">{{ assessment.get_assessment_type_display }}</span></td>
+                        <td>{{ assessment.date }}</td>
+                        <td>{{ assessment.max_score }}</td>
+                        <td>{{ assessment.weight }}%</td>
+                        {% if can_manage_assessments %}
+                            <td>
+                                <div class="table-actions">
+                                    <a class="btn btn-neutral btn-small" href="{% url 'academics:assessment_update' assessment.pk %}">Edit</a>
+                                    <form method="post" action="{% url 'academics:assessment_delete' assessment.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{% if can_manage_assessments %}7{% else %}6{% endif %}">No assessments yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

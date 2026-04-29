@@ -50,7 +50,50 @@
             <p class="stat-value">{{ subject_count }}</p>
             <p class="stat-trend">Curriculum stable</p>
         </article>
+        <article class="stat-card">
+            <p class="stat-label">Outstanding Fees</p>
+            <p class="stat-value">${{ total_outstanding|floatformat:2 }}</p>
+            <p class="stat-trend">${{ total_collected|floatformat:2 }} collected</p>
+        </article>
+        <article class="stat-card">
+            <p class="stat-label">Overdue Invoices</p>
+            <p class="stat-value">{{ overdue_invoice_count }}</p>
+            <p class="stat-trend">Needs follow-up</p>
+        </article>
     </section>
+
+    <!-- Attendance Summary Widget (Last 7 Days) -->
+    {% if total_attendance_records %}
+    <section class="panel" style="margin-top:2rem;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;padding:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div>
+                <p style="margin:0;opacity:0.9;font-size:0.875rem;">Last 7 Days</p>
+                <h3 style="margin:0.25rem 0 0;font-size:1.5rem;font-weight:700;">Attendance Overview</h3>
+            </div>
+            <a href="{% url 'attendance:reports' %}" class="btn" style="background:rgba(255,255,255,0.2);color:white;border:none;">
+                View Full Reports
+            </a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:1rem;margin-top:1rem;">
+            <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+                <p style="margin:0;font-size:0.875rem;opacity:0.9;">Present</p>
+                <p id="attendancePresentCount" style="margin:0.25rem 0 0;font-size:2rem;font-weight:700;">{{ present_count }}</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+                <p style="margin:0;font-size:0.875rem;opacity:0.9;">Absent</p>
+                <p id="attendanceAbsentCount" style="margin:0.25rem 0 0;font-size:2rem;font-weight:700;">{{ absent_count }}</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+                <p style="margin:0;font-size:0.875rem;opacity:0.9;">Late</p>
+                <p id="attendanceLateCount" style="margin:0.25rem 0 0;font-size:2rem;font-weight:700;">{{ late_count }}</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.15);padding:1rem;border-radius:0.5rem;">
+                <p style="margin:0;font-size:0.875rem;opacity:0.9;">Total Records</p>
+                <p id="attendanceTotalCount" style="margin:0.25rem 0 0;font-size:2rem;font-weight:700;">{{ total_attendance_records }}</p>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <section class="responsive-stack" style="margin-top:2rem;">
         <article class="panel">
@@ -64,9 +107,9 @@
             <div class="panel-header">
                 <h3 class="panel-title">Operational Feed</h3>
             </div>
-            <ul class="timeline">
+            <ul class="timeline" id="attendanceTimeline">
                 {% for record in recent_attendance|slice:':5' %}
-                    <li class="timeline-item">
+                    <li class="timeline-item" data-record-id="{{ record.id }}">
                         <span class="timeline-dot"></span>
                         <div>
                             <strong>{{ record.classroom }}</strong>
@@ -74,7 +117,7 @@
                         </div>
                     </li>
                 {% empty %}
-                    <li class="timeline-item">
+                    <li class="timeline-item" id="attendanceTimelineEmpty">
                         <span class="timeline-dot"></span>
                         <div>
                             <strong>Stay tuned</strong>
@@ -83,6 +126,7 @@
                     </li>
                 {% endfor %}
             </ul>
+            <p class="timeline-meta" id="attendanceRealtimeStatus" style="margin-top:0.75rem;">Live updates connected when available.</p>
         </article>
     </section>
 {% elif is_teacher_portal %}
@@ -170,6 +214,21 @@
                 <p class="stat-label">Late / Excused</p>
                 <p class="stat-value">{{ student_attendance_summary.LATE|default:0 }} / {{ student_attendance_summary.EXCUSED|default:0 }}</p>
             </article>
+            <article class="stat-card">
+                <p class="stat-label">Outstanding Fees</p>
+                <p class="stat-value">${{ student_invoice_outstanding|floatformat:2 }}</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Overdue Invoices</p>
+                <p class="stat-value">{{ student_overdue_invoices }}</p>
+            </article>
+        </section>
+        <section class="panel" style="margin-top:1.25rem;">
+            <div class="panel-header">
+                <h3 class="panel-title">Billing</h3>
+                <a href="{% url 'billing:invoice_list' %}" class="btn btn-neutral">Open Billing</a>
+            </div>
+            <p style="margin:0;">Total due: ${{ student_invoice_due|floatformat:2 }} · Paid: ${{ student_invoice_paid|floatformat:2 }} · Outstanding: ${{ student_invoice_outstanding|floatformat:2 }}</p>
         </section>
         <section class="panel" style="margin-top:2rem;">
             <div class="panel-header">
@@ -187,9 +246,14 @@
     {% endif %}
 {% elif is_guardian_portal %}
     <section class="panel hero-panel" style="margin-bottom:1.75rem;">
-        <p class="page-label">Family overview</p>
-        <h2 style="margin:0;font-size:2rem;">Welcome, {{ request.user.display_name }}</h2>
-        <p style="margin:0.25rem 0 0;color:var(--text-muted);">Track each student's attendance without calling the office.</p>
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <p class="page-label">Family overview</p>
+                <h2 style="margin:0;font-size:2rem;">Welcome, {{ request.user.display_name }}</h2>
+                <p style="margin:0.25rem 0 0;color:var(--text-muted);">Track each student's attendance without calling the office.</p>
+            </div>
+            <a href="{% url 'attendance:notification_preferences' %}" class="btn btn-neutral">⚙️ Notification Settings</a>
+        </div>
     </section>
     {% if guardian_children %}
         <section class="responsive-stack">
@@ -199,6 +263,9 @@
                         <div>
                             <h3 class="panel-title">{{ child.student.full_name }}</h3>
                             <p class="timeline-meta">Admission #{{ child.student.admission_number }}</p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{% url 'academics:student_grades_detail' child.student.id %}" class="btn btn-neutral btn-small">View Grades</a>
                         </div>
                     </div>
                     <div class="stat-grid" style="margin-bottom:1rem;">
@@ -214,7 +281,29 @@
                             <p class="stat-label">Late / Excused</p>
                             <p class="stat-value">{{ child.attendance_summary.LATE|default:0 }} / {{ child.attendance_summary.EXCUSED|default:0 }}</p>
                         </article>
+                        <article class="stat-card">
+                            <p class="stat-label">Grade Average</p>
+                            <p class="stat-value">
+                                {% if child.average_percentage %}
+                                    {{ child.average_percentage }}%
+                                {% else %}
+                                    <span style="font-size: 0.875rem; color: var(--text-muted);">No grades</span>
+                                {% endif %}
+                            </p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-label">Outstanding Fees</p>
+                            <p class="stat-value">${{ child.invoice_outstanding|floatformat:2 }}</p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-label">Overdue Invoices</p>
+                            <p class="stat-value">{{ child.overdue_invoice_count }}</p>
+                        </article>
                     </div>
+                    <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
+                        <a href="{% url 'billing:invoice_list' %}?student={{ child.student.id }}" class="btn btn-neutral btn-small">View Billing</a>
+                    </div>
+                    <h4 style="margin: 1rem 0 0.5rem; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Recent Attendance</h4>
                     {% include 'partials/attendance_table.html' with records=child.recent_records show_subject=True %}
                 </article>
             {% endfor %}
@@ -228,5 +317,110 @@
     <section class="panel">
         <p>The dashboard for your role is coming soon.</p>
     </section>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+{% if is_admin_portal %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const presentEl = document.getElementById('attendancePresentCount');
+    if (!presentEl) {
+        return;
+    }
+
+    const absentEl = document.getElementById('attendanceAbsentCount');
+    const lateEl = document.getElementById('attendanceLateCount');
+    const totalEl = document.getElementById('attendanceTotalCount');
+    const timelineEl = document.getElementById('attendanceTimeline');
+    const statusEl = document.getElementById('attendanceRealtimeStatus');
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+    function updateStatus(message) {
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
+    }
+
+    function statusPillClass(status) {
+        if (status === 'PRESENT') {
+            return 'status-present';
+        }
+        if (status === 'ABSENT') {
+            return 'status-absent';
+        }
+        if (status === 'LATE') {
+            return 'status-late';
+        }
+        if (status === 'EXCUSED') {
+            return 'status-excused';
+        }
+        return '';
+    }
+
+    function applyPayload(payload) {
+        presentEl.textContent = payload.present_count ?? 0;
+        absentEl.textContent = payload.absent_count ?? 0;
+        lateEl.textContent = payload.late_count ?? 0;
+        totalEl.textContent = payload.total_attendance_records ?? 0;
+
+        if (timelineEl && payload.latest_record) {
+            const existing = timelineEl.querySelector('[data-record-id="' + payload.latest_record.id + '"]');
+            if (!existing) {
+                const emptyState = document.getElementById('attendanceTimelineEmpty');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+
+                const item = document.createElement('li');
+                item.className = 'timeline-item';
+                item.setAttribute('data-record-id', String(payload.latest_record.id));
+                item.innerHTML = `
+                    <span class="timeline-dot"></span>
+                    <div>
+                        <strong>${payload.latest_record.classroom}</strong>
+                        <p class="timeline-meta">${payload.latest_record.student_name} • <span class="status-pill ${statusPillClass(payload.latest_record.status)}">${payload.latest_record.status_display}</span> on ${payload.latest_record.date}</p>
+                    </div>
+                `;
+                timelineEl.prepend(item);
+
+                while (timelineEl.children.length > 5) {
+                    timelineEl.removeChild(timelineEl.lastElementChild);
+                }
+            }
+        }
+
+        const now = new Date();
+        updateStatus('Live updates active. Last refresh at ' + now.toLocaleTimeString() + '.');
+    }
+
+    function connectDashboardSocket() {
+        const socket = new WebSocket(`${protocol}://${window.location.host}/ws/dashboard/attendance/`);
+
+        socket.onopen = function () {
+            updateStatus('Live updates connected.');
+        };
+
+        socket.onmessage = function (event) {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'attendance_dashboard' && data.payload) {
+                    applyPayload(data.payload);
+                }
+            } catch (error) {
+                updateStatus('Live updates received invalid payload.');
+            }
+        };
+
+        socket.onclose = function () {
+            updateStatus('Live updates disconnected. Reconnecting...');
+            setTimeout(connectDashboardSocket, 3000);
+        };
+    }
+
+    connectDashboardSocket();
+});
+</script>
 {% endif %}
 {% endblock %}
